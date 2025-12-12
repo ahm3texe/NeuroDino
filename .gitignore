@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.DS_Store
+.ORIGINAL_BACKUP/
+.vscode/
+runs/
+training_log.csv
