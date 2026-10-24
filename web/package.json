@@ -1,0 +1,17 @@
+{
+  "name": "neurodino-web",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "npm run checkpoint && vite",
+    "checkpoint": "esbuild scripts/checkpoint.ts --bundle --platform=node --format=esm --outfile=node_modules/.cache/checkpoint.mjs --log-level=warning && node node_modules/.cache/checkpoint.mjs",
+    "build": "npm run checkpoint && tsc --noEmit && vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "vite": "^7.2.0",
+    "esbuild": "^0.28.2",
+    "@types/node": "^24.0.0"
+  }
+}

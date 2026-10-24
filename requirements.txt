@@ -1,0 +1,7 @@
+# Training, watching and exporting (main_train.py, watch_model.py, export_best_brain.py)
+pygame==2.6.1
+numpy==2.3.4
+tensorboardX==2.6.4
+
+# Only for the original Gradio dashboard (app.py)
+gradio==6.1.0

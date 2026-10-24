@@ -559,7 +559,10 @@ def main():
         print("   R - Restart game")
         print("   Q/ESC - Quit\n")
     
+    
     running = True
+    last_log_time = pygame.time.get_ticks()
+    frame_count = 0
     
     try:
         while running:
@@ -568,6 +571,8 @@ def main():
                 clock.tick(60)
             else:
                 clock.tick()  # Unlimited
+            
+            frame_count += 1
             
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -609,6 +614,17 @@ def main():
                 if not args.silent and not turbo_mode:
                     pygame.time.wait(500)
                 watcher.restart_game()
+
+            # Logging for Turbo/Silent/Headless Modes
+            if args.silent or turbo_mode:
+                current_time = pygame.time.get_ticks()
+                if current_time - last_log_time > 1000: # 10 seconds
+                    elapsed_seconds = (current_time - last_log_time) / 1000.0
+                    real_sps = int(frame_count / elapsed_seconds)
+                    print(f"  [Watch] Score: {watcher.score:,} | High: {watcher.high_score:,} | SPS: {real_sps} (Sim/Sec)")
+                    
+                    last_log_time = current_time
+                    frame_count = 0
             
             # Update title (only in display mode)
             if not args.silent and not turbo_mode:

@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="A neural network trained by a genetic algorithm plays the Chrome Dino game live. Everyone watches the same game." />
+    <title>NeuroDino</title>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div class="brand">
+          <canvas id="brand-icon" width="44" height="47" aria-hidden="true"></canvas>
+          <div>
+            <h1>NEURODINO</h1>
+            <p>A neural network trained by a genetic algorithm plays Chrome Dino</p>
+          </div>
+        </div>
+        <div class="topbar-badges">
+          <a class="icon-link" href="https://github.com/ahm3texe/neurodino"
+             aria-label="Source on GitHub" title="Source on GitHub">
+            <svg viewBox="0 0 16 16" width="18" height="18" aria-hidden="true">
+              <path fill="currentColor" d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"/>
+            </svg>
+          </a>
+          <span class="chip" title="The page plays the record holder of training; it does not train">Gen 77 · best of 50</span>
+          <span class="live-badge" title="Every browser computes the game in step, frame for frame">
+            <span class="live-dot"></span>
+            Live · everyone watches the same game
+          </span>
+        </div>
+      </div>
+    </header>
+
+    <main class="app">
+      <div class="dashboard">
+        <section class="card game-card area-game" aria-label="Game">
+          <div class="game-stage">
+            <canvas id="game" width="600" height="150" role="img"
+                    aria-label="Neural network playing the Chrome Dino game"></canvas>
+            <canvas id="sensors" aria-hidden="true"></canvas>
+            <button type="button" class="switch" id="sensor-toggle" aria-pressed="true">
+              <span class="switch-track"><span class="switch-thumb"></span></span>
+              Sensors
+            </button>
+          </div>
+          <dl class="stats">
+            <div title="As in Chrome, the in-game counter shows the last 6 digits of the score"><dt>Total score</dt><dd id="stat-score">0</dd></div>
+            <div><dt>Best</dt><dd id="stat-best">0</dd></div>
+            <div><dt>Deaths</dt><dd id="stat-deaths">0</dd></div>
+            <div title="Game time since the last death"><dt>Alive for</dt><dd id="stat-alive">0s</dd></div>
+          </dl>
+        </section>
+
+        <section class="card network-card area-network" aria-labelledby="network-title">
+          <div class="card-head">
+            <div>
+              <h2 id="network-title">Neural network</h2>
+              <p class="card-sub">Lines show the signal flowing now: weight × activation</p>
+            </div>
+            <div class="card-tools">
+              <ul class="legend" aria-label="Color legend">
+                <li><span class="swatch swatch-pos"></span>Positive</li>
+                <li><span class="swatch swatch-neg"></span>Negative</li>
+              </ul>
+              <button type="button" class="tool-button" id="settings-toggle"
+                      aria-expanded="false" aria-controls="settings-popover">Settings ▼</button>
+            </div>
+          </div>
+          <div class="settings-popover" id="settings-popover" hidden>
+            <div id="neuro-custom-controls">
+              <div class="neuro-header" onclick="toggleCustomControls()">
+                <h3>View settings</h3>
+                <span id="neuro-arrow">▼</span>
+              </div>
+
+              <div id="neuro-controls-content">
+                <div class="neuro-control-group">
+                  <div class="neuro-header neuro-group-header" onclick="toggleNeuroGroup('group-edges', 'arrow-edges')">
+                    <h4>Connections</h4>
+                    <span id="arrow-edges" class="neuro-group-arrow" style="transform: rotate(-90deg);">▼</span>
+                  </div>
+                  <div id="group-edges" class="neuro-group" style="max-height: 0px; opacity: 0; margin-bottom: 0px;">
+                    <div class="neuro-row neuro-checkbox-wrapper" onclick="toggleNeuroCheck('bezier_check', 'useBezier')">
+                      <div id="neuro_bezier_check" class="neuro-checkbox checked"></div>
+                      <span class="neuro-label">Bézier curves</span>
+                    </div>
+                    <div class="neuro-row neuro-checkbox-wrapper" onclick="toggleNeuroCheck('vertical_check', 'useVerticalLayout')">
+                      <div id="neuro_vertical_check" class="neuro-checkbox"></div>
+                      <span class="neuro-label">Vertical layout</span>
+                    </div>
+                    <div class="neuro-row neuro-checkbox-wrapper" onclick="toggleNeuroCheck('active_check', 'showActiveEdgesOnly')">
+                      <div id="neuro_active_check" class="neuro-checkbox checked"></div>
+                      <span class="neuro-label">Active signals only</span>
+                    </div>
+                    <div class="neuro-row neuro-checkbox-wrapper" onclick="toggleNeuroCheck('weight_color_check', 'useWeightColor')">
+                      <div id="neuro_weight_color_check" class="neuro-checkbox"></div>
+                      <span class="neuro-label">Color by weight</span>
+                    </div>
+                    <div id="neuro-weight-colors" class="neuro-sub" style="display: none;">
+                      <div class="neuro-row">
+                        <span class="neuro-label">Positive</span>
+                        <input type="color" class="neuro-color" value="#2563eb"
+                               oninput="updateNeuroColor('posColor', this.value)">
+                      </div>
+                      <div class="neuro-row">
+                        <span class="neuro-label">Negative</span>
+                        <input type="color" class="neuro-color" value="#e5484d"
+                               oninput="updateNeuroColor('negColor', this.value)">
+                      </div>
+                    </div>
+                    <div id="neuro-default-color" class="neuro-sub" style="display: block;">
+                      <div class="neuro-row">
+                        <span class="neuro-label">Line color</span>
+                        <input type="color" class="neuro-color" value="#505050"
+                               oninput="updateNeuroColor('defaultEdgeColor', this.value)">
+                      </div>
+                    </div>
+                    <div class="neuro-row neuro-checkbox-wrapper" onclick="toggleNeuroCheck('prop_width_check', 'useProportionalWidth')">
+                      <div id="neuro_prop_width_check" class="neuro-checkbox"></div>
+                      <span class="neuro-label">Width by weight</span>
+                    </div>
+                    <div class="neuro-row neuro-checkbox-wrapper" onclick="toggleNeuroCheck('prop_opacity_check', 'useProportionalOpacity')">
+                      <div id="neuro_prop_opacity_check" class="neuro-checkbox checked"></div>
+                      <span class="neuro-label">Opacity by weight</span>
+                    </div>
+                    <div class="neuro-row">
+                      <span class="neuro-label">Width</span>
+                      <div class="neuro-slider-container">
+                        <input type="range" class="neuro-slider" min="0" max="3" step="0.1" value="0.6"
+                               oninput="updateNeuroVal('edgeWidth', this.value, 'val_edgeWidth')">
+                        <span id="val_edgeWidth" class="neuro-value">0.6</span>
+                      </div>
+                    </div>
+                    <div class="neuro-row">
+                      <span class="neuro-label">Opacity</span>
+                      <div class="neuro-slider-container">
+                        <input type="range" class="neuro-slider" min="0.1" max="1.0" step="0.1" value="0.5"
+                               oninput="updateNeuroVal('edgeOpacity', this.value, 'val_opacity')">
+                        <span id="val_opacity" class="neuro-value">0.5</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="neuro-control-group">
+                  <div class="neuro-header neuro-group-header" onclick="toggleNeuroGroup('group-nodes', 'arrow-nodes')">
+                    <h4>Neurons</h4>
+                    <span id="arrow-nodes" class="neuro-group-arrow" style="transform: rotate(-90deg);">▼</span>
+                  </div>
+                  <div id="group-nodes" class="neuro-group" style="max-height: 0px; opacity: 0; margin-bottom: 0px;">
+                    <div class="neuro-row neuro-checkbox-wrapper" onclick="toggleNeuroCheck('pixel_check', 'usePixelNodes')">
+                      <div id="neuro_pixel_check" class="neuro-checkbox"></div>
+                      <span class="neuro-label">Pixel neurons</span>
+                    </div>
+                    <div class="neuro-row neuro-checkbox-wrapper" onclick="toggleNeuroCheck('bias_check', 'showBiases')">
+                      <div id="neuro_bias_check" class="neuro-checkbox checked"></div>
+                      <span class="neuro-label">Show biases</span>
+                    </div>
+                    <div class="neuro-row neuro-checkbox-wrapper" onclick="toggleNeuroCheck('activation_color_check', 'useNodeActivationColor')">
+                      <div id="neuro_activation_color_check" class="neuro-checkbox"></div>
+                      <span class="neuro-label">Color by activation</span>
+                    </div>
+                    <div id="neuro-activation-colors" class="neuro-sub" style="display: none;">
+                      <div class="neuro-row">
+                        <span class="neuro-label">Positive</span>
+                        <input type="color" class="neuro-color" value="#2563eb"
+                               oninput="updateNeuroColor('posColor', this.value)">
+                      </div>
+                      <div class="neuro-row">
+                        <span class="neuro-label">Negative</span>
+                        <input type="color" class="neuro-color" value="#e5484d"
+                               oninput="updateNeuroColor('negColor', this.value)">
+                      </div>
+                    </div>
+                    <div class="neuro-row">
+                      <span class="neuro-label">Neuron color</span>
+                      <input type="color" class="neuro-color" value="#ffffff"
+                             oninput="updateNeuroColor('nodeColor', this.value)">
+                    </div>
+                    <div class="neuro-row">
+                      <span class="neuro-label">Border</span>
+                      <input type="color" class="neuro-color" value="#535353"
+                             oninput="updateNeuroColor('nodeBorderColor', this.value)">
+                    </div>
+                    <div class="neuro-row">
+                      <span class="neuro-label">Neuron size</span>
+                      <div class="neuro-slider-container">
+                        <input type="range" class="neuro-slider" min="2" max="50" step="1" value="10"
+                               oninput="updateNeuroVal('targetRadius', this.value/2, 'val_radius', this.value)">
+                        <span id="val_radius" class="neuro-value">10</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="neuro-control-group">
+                  <div class="neuro-header neuro-group-header" onclick="toggleNeuroGroup('group-layout', 'arrow-layout')">
+                    <h4>Layout</h4>
+                    <span id="arrow-layout" class="neuro-group-arrow" style="transform: rotate(-90deg);">▼</span>
+                  </div>
+                  <div id="group-layout" class="neuro-group" style="max-height: 0px; opacity: 0; margin-bottom: 0px;">
+                    <div class="neuro-row">
+                      <span class="neuro-label">Layer spacing</span>
+                      <div class="neuro-slider-container">
+                        <input type="range" class="neuro-slider" min="50" max="800" step="10" value="290"
+                               oninput="updateNeuroVal('layerSpacing', this.value, 'val_spacing')">
+                        <span id="val_spacing" class="neuro-value">290</span>
+                      </div>
+                    </div>
+                    <div class="neuro-row">
+                      <span class="neuro-label">Input spacing</span>
+                      <div class="neuro-slider-container">
+                        <input type="range" class="neuro-slider" min="5" max="100" step="1" value="40"
+                               oninput="updateNeuroVal('vSpacingInput', this.value, 'val_v_input')">
+                        <span id="val_v_input" class="neuro-value">40</span>
+                      </div>
+                    </div>
+                    <div class="neuro-row">
+                      <span class="neuro-label">Hidden spacing</span>
+                      <div class="neuro-slider-container">
+                        <input type="range" class="neuro-slider" min="5" max="100" step="1" value="10"
+                               oninput="updateNeuroVal('vSpacingHidden', this.value, 'val_v_hidden')">
+                        <span id="val_v_hidden" class="neuro-value">10</span>
+                      </div>
+                    </div>
+                    <div class="neuro-row">
+                      <span class="neuro-label">Output spacing</span>
+                      <div class="neuro-slider-container">
+                        <input type="range" class="neuro-slider" min="5" max="100" step="1" value="40"
+                               oninput="updateNeuroVal('vSpacingOutput', this.value, 'val_v_output')">
+                        <span id="val_v_output" class="neuro-value">40</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div id="canvas-container">
+            <canvas id="brainCanvas"></canvas>
+          </div>
+          <p class="canvas-hint">Drag: pan · Ctrl/Cmd + wheel: zoom · Double-click: fit · Hold a neuron: its connections</p>
+        </section>
+
+        <section class="card side-card area-decision" aria-labelledby="decision-title">
+          <div class="side-head">
+            <h2 id="decision-title">Decision</h2>
+            <span class="side-meta" id="decision-frame">frame 0</span>
+          </div>
+          <div class="now">
+            <div>
+              <span class="eyebrow">Now</span>
+              <strong id="now-action">RUN</strong>
+            </div>
+            <div class="now-confidence">
+              <span class="eyebrow">Confidence</span>
+              <strong id="now-confidence">0%</strong>
+            </div>
+          </div>
+          <div class="decision">
+            <div class="decision-row action-jump">
+              <span class="decision-name">Jump</span>
+              <span class="decision-bar"><span class="decision-fill"></span></span>
+              <span class="decision-value">0%</span>
+            </div>
+            <div class="decision-row action-duck">
+              <span class="decision-name">Duck</span>
+              <span class="decision-bar"><span class="decision-fill"></span></span>
+              <span class="decision-value">0%</span>
+            </div>
+            <div class="decision-row action-run">
+              <span class="decision-name">Run</span>
+              <span class="decision-bar"><span class="decision-fill"></span></span>
+              <span class="decision-value">0%</span>
+            </div>
+          </div>
+          <div class="strip-head">
+            <span>Last 75 frames</span>
+            <span class="strip-legend">
+              <span><i class="action-jump"></i>Jump</span>
+              <span><i class="action-duck"></i>Duck</span>
+              <span><i class="action-run"></i>Run</span>
+            </span>
+          </div>
+          <div class="strip" id="decision-strip" aria-hidden="true"></div>
+        </section>
+
+        <section class="card side-card area-model" aria-labelledby="model-title">
+          <div class="side-head">
+            <h2 id="model-title">Model Information</h2>
+            <span class="side-meta">771 parameters</span>
+          </div>
+          <div class="chain">
+            <span class="chip">12 inputs</span>→<span class="chip">48 · tanh</span>→<span class="chip">3 · softmax</span>
+          </div>
+          <dl class="facts">
+            <div><dt>Input</dt><dd>12 sensors</dd></div>
+            <div><dt>Hidden layer</dt><dd>48 neurons · tanh</dd></div>
+            <div><dt>Output</dt><dd>3 actions · softmax</dd></div>
+            <div><dt>Weights</dt><dd>12×48 + 48×3</dd></div>
+            <div><dt>Biases</dt><dd>48 + 3</dd></div>
+          </dl>
+        </section>
+
+        <section class="card side-card area-training" aria-labelledby="training-title">
+          <div class="side-head">
+            <h2 id="training-title">Training</h2>
+            <span class="chip">Genetic algorithm</span>
+          </div>
+          <dl class="kpis">
+            <div><dt>Generations</dt><dd id="train-generations">83</dd></div>
+            <div><dt>Population</dt><dd>50</dd></div>
+            <div><dt>Best score</dt><dd id="train-best">547,287</dd></div>
+          </dl>
+          <div class="chart-head">
+            <span>Score per generation (log)</span>
+            <span class="chart-legend">
+              <span><i class="key-record"></i>Record</span>
+              <span><i class="key-best"></i>Best</span>
+              <span><i class="key-avg"></i>Average</span>
+            </span>
+          </div>
+          <div class="chart" id="training-chart"></div>
+          <p class="card-sub">Elitism (best 2), tournament selection, uniform crossover and a mutation that shrinks as the scores grow. The page plays the record holder from generation 77.</p>
+        </section>
+
+      </div>
+
+      <section class="card about" aria-labelledby="about-title">
+        <h2 id="about-title">How it works</h2>
+        <div class="about-grid">
+          <div>
+            <h3>What it sees</h3>
+            <p>Every frame the network reads 12 numbers from the game: how close the next two obstacles are, how wide they are and whether they are high birds to duck under, the gap between them, the game speed, and the dino's own height, vertical speed and whether it is in the air or ducking. 48 hidden neurons (tanh) turn them into three probabilities, jump, duck and run, and the dino does the likeliest. Turn on Sensors to see the distances, and hover a neuron to see what it does.</p>
+          </div>
+          <div>
+            <h3>How it learned</h3>
+            <p>No examples and no backpropagation: a genetic algorithm. In each generation 50 networks played the game and their scores decided who had children. The best two carried over unchanged, parents were picked by tournament, their weights were mixed at random and then mutated, less as the scores grew, with an occasional larger shock to get out of dead ends. After 83 generations the record, 547,287 points, belonged to an individual from generation 77. That is the network playing here.</p>
+          </div>
+          <div>
+            <h3>Why everyone sees the same game</h3>
+            <p>Nothing is streamed: your browser computes the game itself. The engine is Chrome's T-Rex runner made fully deterministic, with a seeded random number generator and exp and tanh written in plain arithmetic, so every browser produces bit-identical frames. The page starts from a recent snapshot, fast-forwards to the current time and then takes one step every 1/60 s of the clock, so everyone who opens it sees the same frame at the same moment.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p>The game (engine, sprites and rules) is ported from Chromium's T-Rex runner, <a href="https://source.chromium.org/chromium/chromium/src/+/main:components/neterror/resources/dino_game/">components/neterror/resources/dino_game</a>. © The Chromium Authors, <a href="LICENSE-chromium.txt">BSD-3-Clause</a>. Not affiliated with Google.</p>
+      <p>NeuroDino by <a href="https://github.com/ahm3texe">ahm3texe</a> · <a href="https://github.com/ahm3texe/neurodino">Source</a></p>
+    </footer>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

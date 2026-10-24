@@ -1,0 +1,354 @@
+<div id="neuro-custom-controls"
+    style="font-family: 'PressStart2P', monospace; background: #fff; padding: 20px 20px 5px 20px; border: 2px solid #535353; margin-top: 20px;">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+        /* Header Toggle Style */
+        .neuro-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            padding-bottom: 15px;
+            user-select: none;
+        }
+
+        #neuro-custom-controls h3 {
+            margin: 0;
+            color: #535353;
+            font-size: 14px;
+        }
+
+        #neuro-arrow {
+            transition: transform 0.3s ease;
+            transform: rotate(-90deg);
+            /* Start collapsed state */
+            font-size: 12px;
+            color: #535353;
+        }
+
+        /* Collapsible Content */
+        #neuro-controls-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease-out, opacity 0.3s ease-out, padding 0.3s ease;
+            opacity: 0;
+            padding-top: 0;
+            padding-bottom: 0;
+        }
+
+        .neuro-control-group {
+            margin-bottom: 20px;
+        }
+
+        .neuro-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            gap: 10px;
+        }
+
+        .neuro-label {
+            font-size: 10px;
+            color: #535353;
+            min-width: 120px;
+        }
+
+        /* Custom Pixel Checkbox */
+        .neuro-checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .neuro-checkbox {
+            width: 16px;
+            height: 16px;
+            border: 2px solid #535353;
+            display: inline-block;
+            margin-right: 8px;
+            position: relative;
+        }
+
+        .neuro-checkbox.checked::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 8px;
+            height: 8px;
+            background-color: #535353;
+        }
+
+        /* Custom Pixel Slider */
+        .neuro-slider-container {
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .neuro-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 4px;
+            background: #e0e0e0;
+            outline: none;
+            border: 1px solid #535353;
+        }
+
+        .neuro-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            background: #fff;
+            border: 2px solid #535353;
+            cursor: pointer;
+        }
+
+        .neuro-slider::-webkit-slider-thumb:hover {
+            background: #535353;
+        }
+
+        .neuro-value {
+            font-size: 10px;
+            min-width: 30px;
+            text-align: right;
+        }
+
+        /* Color Picker Wrapper */
+        .neuro-color {
+            width: 24px;
+            height: 24px;
+            border: 2px solid #535353;
+            padding: 0;
+            background: none;
+            cursor: pointer;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        .neuro-color::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+
+        .neuro-color::-webkit-color-swatch {
+            border: none;
+        }
+    </style>
+
+    <div class="neuro-header" onclick="toggleCustomControls()">
+        <h3>CUSTOM KONTROL PANELI</h3>
+        <span id="neuro-arrow">▼</span>
+    </div>
+
+    <!-- Collapsible Wrapper -->
+    <div id="neuro-controls-content">
+        <div style="border-top: 2px solid #535353; margin-bottom: 20px;"></div>
+
+        <!-- GROUP 1: EDGES -->
+        <div class="neuro-control-group">
+            <div class="neuro-header" onclick="toggleNeuroGroup('group-edges', 'arrow-edges')"
+                style="padding-bottom: 5px;">
+                <h4 style="margin: 0; color: #535353; font-size: 10px; text-decoration: none;">BAĞLANTILAR (EDGES)</h4>
+                <span id="arrow-edges"
+                    style="font-size: 10px; color: #535353; transition: transform 0.3s ease; transform: rotate(-90deg);">▼</span>
+            </div>
+
+            <div id="group-edges"
+                style="max-height: 0; overflow: hidden; transition: max-height 0.3s ease, opacity 0.3s ease; opacity: 0; padding-left: 5px;">
+                <div class="neuro-row neuro-checkbox-wrapper" onclick="toggleNeuroCheck('bezier_check', 'useBezier')">
+                    <div id="neuro_bezier_check" class="neuro-checkbox"></div>
+                    <span class="neuro-label">Bezier (Kavisli)</span>
+                </div>
+
+                <div class="neuro-row neuro-checkbox-wrapper"
+                    onclick="toggleNeuroCheck('active_check', 'showActiveEdgesOnly')">
+                    <div id="neuro_active_check" class="neuro-checkbox"></div>
+                    <span class="neuro-label">Canlı Sinyal Modu</span>
+                </div>
+
+                <div class="neuro-row neuro-checkbox-wrapper"
+                    onclick="toggleNeuroCheck('weight_color_check', 'useWeightColor')">
+                    <div id="neuro_weight_color_check" class="neuro-checkbox"></div>
+                    <span class="neuro-label">Ağırlığa Göre Renk</span>
+                </div>
+
+                <!-- Conditional Color Pickers -->
+                <div id="neuro-weight-colors" style="display: none; padding-left: 20px; margin-bottom: 10px;">
+                    <div class="neuro-row">
+                        <span class="neuro-label" style="min-width: 100px;">Pozitif (+):</span>
+                        <input type="color" class="neuro-color" value="#0000ff"
+                            oninput="updateNeuroColor('posColor', this.value)">
+                    </div>
+                    <div class="neuro-row">
+                        <span class="neuro-label" style="min-width: 100px;">Negatif (-):</span>
+                        <input type="color" class="neuro-color" value="#ff0000"
+                            oninput="updateNeuroColor('negColor', this.value)">
+                    </div>
+                </div>
+
+                <!-- Default Color Picker (Visible when Weight Color is OFF) -->
+                <div id="neuro-default-color" style="display: block; padding-left: 20px; margin-bottom: 10px;">
+                    <div class="neuro-row">
+                        <span class="neuro-label" style="min-width: 100px;">Standart Renk:</span>
+                        <input type="color" class="neuro-color" value="#505050"
+                            oninput="updateNeuroColor('defaultEdgeColor', this.value)">
+                    </div>
+                </div>
+
+                <div class="neuro-row neuro-checkbox-wrapper"
+                    onclick="toggleNeuroCheck('prop_width_check', 'useProportionalWidth')">
+                    <div id="neuro_prop_width_check" class="neuro-checkbox"></div>
+                    <span class="neuro-label">Ağırlığa Göre Kalınlık</span>
+                </div>
+
+                <div class="neuro-row">
+                    <span class="neuro-label">Baz Kalınlık</span>
+                    <div class="neuro-slider-container">
+                        <input type="range" class="neuro-slider" min="0" max="3" step="0.1" value="0.5"
+                            oninput="updateNeuroVal('edgeWidth', this.value, 'val_edgeWidth')">
+                        <span id="val_edgeWidth" class="neuro-value">0.5</span>
+                    </div>
+                </div>
+
+                <div class="neuro-row neuro-checkbox-wrapper"
+                    onclick="toggleNeuroCheck('prop_opacity_check', 'useProportionalOpacity')">
+                    <div id="neuro_prop_opacity_check" class="neuro-checkbox"></div>
+                    <span class="neuro-label">Ağırlığa Göre Opaklık</span>
+                </div>
+
+                <div class="neuro-row">
+                    <span class="neuro-label">Baz Opaklık</span>
+                    <div class="neuro-slider-container">
+                        <input type="range" class="neuro-slider" min="0.1" max="1.0" step="0.1" value="1.0"
+                            oninput="updateNeuroVal('edgeOpacity', this.value, 'val_opacity')">
+                        <span id="val_opacity" class="neuro-value">1.0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="border-top: 1px dashed #ccc; margin: 15px 0;"></div>
+
+        <!-- GROUP 2: NODES -->
+        <div class="neuro-control-group">
+            <div class="neuro-header" onclick="toggleNeuroGroup('group-nodes', 'arrow-nodes')"
+                style="padding-bottom: 5px;">
+                <h4 style="margin: 0; color: #535353; font-size: 10px; text-decoration: none;">NÖRONLAR (NODES)</h4>
+                <span id="arrow-nodes"
+                    style="font-size: 10px; color: #535353; transition: transform 0.3s ease; transform: rotate(-90deg);">▼</span>
+            </div>
+
+            <div id="group-nodes"
+                style="max-height: 0; overflow: hidden; transition: max-height 0.3s ease, opacity 0.3s ease; opacity: 0; padding-left: 5px;">
+                <div class="neuro-row neuro-checkbox-wrapper"
+                    onclick="toggleNeuroCheck('pixel_check', 'usePixelNodes')">
+                    <div id="neuro_pixel_check" class="neuro-checkbox"></div>
+                    <span class="neuro-label">Piksel Modu</span>
+                </div>
+
+                <div class="neuro-row neuro-checkbox-wrapper" onclick="toggleNeuroCheck('bias_check', 'showBiases')">
+                    <div id="neuro_bias_check" class="neuro-checkbox checked"></div> <!-- Default Checked -->
+                    <span class="neuro-label">Bias Göster</span>
+                </div>
+
+                <div class="neuro-row neuro-checkbox-wrapper"
+                    onclick="toggleNeuroCheck('activation_color_check', 'useNodeActivationColor')">
+                    <div id="neuro_activation_color_check" class="neuro-checkbox"></div>
+                    <span class="neuro-label">Aktivasyon Rengi</span>
+                </div>
+
+                <!-- Conditional Activation Colors -->
+                <div id="neuro-activation-colors" style="display: none; padding-left: 20px; margin-bottom: 10px;">
+                    <div class="neuro-row">
+                        <span class="neuro-label" style="min-width: 100px;">Pozitif (+):</span>
+                        <input type="color" class="neuro-color" value="#0000ff"
+                            oninput="updateNeuroColor('posColor', this.value)">
+                    </div>
+                    <div class="neuro-row">
+                        <span class="neuro-label" style="min-width: 100px;">Negatif (-):</span>
+                        <input type="color" class="neuro-color" value="#ff0000"
+                            oninput="updateNeuroColor('negColor', this.value)">
+                    </div>
+                </div>
+
+                <div class="neuro-row">
+                    <span class="neuro-label">Node Rengi:</span>
+                    <input type="color" class="neuro-color" value="#ffffff"
+                        oninput="updateNeuroColor('nodeColor', this.value)">
+                </div>
+
+                <div class="neuro-row">
+                    <span class="neuro-label">Çerçeve:</span>
+                    <input type="color" class="neuro-color" value="#333333"
+                        oninput="updateNeuroColor('nodeBorderColor', this.value)">
+                </div>
+
+                <div class="neuro-row">
+                    <span class="neuro-label">Node Çapı</span>
+                    <div class="neuro-slider-container">
+                        <input type="range" class="neuro-slider" min="2" max="50" step="1" value="10"
+                            oninput="updateNeuroVal('targetRadius', this.value/2, 'val_radius', this.value)">
+                        <span id="val_radius" class="neuro-value">10</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="border-top: 1px dashed #ccc; margin: 15px 0;"></div>
+
+        <!-- GROUP 3: LAYOUT -->
+        <div class="neuro-control-group">
+            <div class="neuro-header" onclick="toggleNeuroGroup('group-layout', 'arrow-layout')"
+                style="padding-bottom: 5px;">
+                <h4 style="margin: 0; color: #535353; font-size: 10px; text-decoration: none;">YERLEŞİM (LAYOUT)</h4>
+                <span id="arrow-layout"
+                    style="font-size: 10px; color: #535353; transition: transform 0.3s ease; transform: rotate(-90deg);">▼</span>
+            </div>
+
+            <div id="group-layout"
+                style="max-height: 0; overflow: hidden; transition: max-height 0.3s ease, opacity 0.3s ease; opacity: 0; padding-left: 5px;">
+                <div class="neuro-row">
+                    <span class="neuro-label">Katman Aralığı</span>
+                    <div class="neuro-slider-container">
+                        <input type="range" class="neuro-slider" min="50" max="400" step="10" value="290"
+                            oninput="updateNeuroVal('layerSpacing', this.value, 'val_spacing')">
+                        <span id="val_spacing" class="neuro-value">290</span>
+                    </div>
+                </div>
+
+                <div class="neuro-row">
+                    <span class="neuro-label">Giriş Dikey</span>
+                    <div class="neuro-slider-container">
+                        <input type="range" class="neuro-slider" min="5" max="100" step="1" value="30"
+                            oninput="updateNeuroVal('vSpacingInput', this.value, 'val_v_input')">
+                        <span id="val_v_input" class="neuro-value">30</span>
+                    </div>
+                </div>
+
+                <div class="neuro-row">
+                    <span class="neuro-label">Gizli Dikey</span>
+                    <div class="neuro-slider-container">
+                        <input type="range" class="neuro-slider" min="5" max="100" step="1" value="10"
+                            oninput="updateNeuroVal('vSpacingHidden', this.value, 'val_v_hidden')">
+                        <span id="val_v_hidden" class="neuro-value">10</span>
+                    </div>
+                </div>
+
+                <div class="neuro-row">
+                    <span class="neuro-label">Çıkış Dikey</span>
+                    <div class="neuro-slider-container">
+                        <input type="range" class="neuro-slider" min="5" max="100" step="1" value="30"
+                            oninput="updateNeuroVal('vSpacingOutput', this.value, 'val_v_output')">
+                        <span id="val_v_output" class="neuro-value">30</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

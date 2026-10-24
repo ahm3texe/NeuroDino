@@ -1,7 +1,8 @@
-
 import os
 import sys
 import argparse
+import math
+import numpy as np
 import pygame
 
 # Add pydino directory to sys.path so that internal imports (e.g. 'from constants import FPS') work
@@ -43,7 +44,7 @@ def main():
     else:
         target_fps = 60  # Default to 60 FPS (Standard)
     
-    fps_modes = [60, 480, 0]  # Visual, Fast, Unlimited
+    fps_modes = [60, 480, 0, -1]  # Visual, Fast, Unlimited, Headless Train
     current_fps_index = 0
     
     # Note: NeuroRunner(target_fps=60) means physics runs at 16ms steps.
@@ -51,16 +52,25 @@ def main():
     # If we tick at 0, it's unlimited (Maximum hardware speed).
     runner = NeuroRunner(screen, dims, pop_size=50, target_fps=60)
     runner.start()  # Start playing state
+    if args.headless:
+        # Nothing is shown, so skip drawing the game and the brain every step;
+        # the simulation is unaffected. Drawing to the dummy display kept
+        # --headless at a few hundred steps per second.
+        runner.set_rendering(False)
     
     running = True
     last_gen = 0
+    last_log_time = pygame.time.get_ticks()
+    frame_count = 0 
     
     while running:
         # Unlimited mode: don't sleep
-        if target_fps == 0:
+        if target_fps == 0 or target_fps == -1:
             clock.tick()
         else:
             clock.tick(target_fps)
+        
+        frame_count += 1
         
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -74,24 +84,46 @@ def main():
                     print("Speed: Normal (60 FPS)")
                 elif target_fps == 480:
                     print("Speed: Fast (480 FPS)")
-                else:
+                elif target_fps == 0:
                     print("Speed: UNLIMITED (Max Hardware)")
+                else:
+                    print("Speed: HEADLESS SIMULATION (No Rendering)")
+
+                # Apply rendering state
+                if target_fps == -1:
+                    runner.set_rendering(False)
+                    # For logic, we behave like unlimited
+                else:
+                    runner.set_rendering(True)
         
         runner.update()
         
-        # Headless mode: skip display updates, just show progress periodically
-        if args.headless:
-            # Progress indicator every 10 generations
-            if runner.generation != last_gen and runner.generation % 10 == 0:
-                fps = int(clock.get_fps())
-                print(f"  [Progress] Gen {runner.generation} | Best: {runner.best_global_score} | FPS: {fps}")
-                last_gen = runner.generation
+        # Headless mode (CLI arg or Runtime Toggle): skip display updates
+        if args.headless or target_fps == -1:
+            # Progress indicator every 10 seconds (Runtime Feedback)
+            current_time = pygame.time.get_ticks()
+            if current_time - last_log_time > 1000  : # 10 seconds
+                elapsed_seconds = (current_time - last_log_time) / 1000.0
+                real_fps = int(frame_count / elapsed_seconds)
+                
+                print(f"  [Progress] Gen {runner.generation} | Best: {runner.best_global_score} | SPS: {real_fps} (Sim/Sec)")
+                
+                last_log_time = current_time
+                frame_count = 0
         else:
             pygame.display.flip()
             
             # Display FPS mode in title
+            try:
+                raw_fps = clock.get_fps()
+                safe_fps = int(raw_fps) if not math.isinf(raw_fps) else 99999
+            except OverflowError:
+                safe_fps = 99999
+
             if target_fps == 0:
-                fps_text = f"UNLIMITED ({int(clock.get_fps())})"
+                fps_text = f"UNLIMITED ({safe_fps})"
+            elif target_fps == -1:
+                fps_text = f"HEADLESS ({safe_fps})"
             else:
                 fps_text = str(target_fps)
             

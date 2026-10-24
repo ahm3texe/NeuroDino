@@ -44,15 +44,15 @@ class Brain:
         inputs = np.array(input_array).reshape(-1, 1)
 
         # Input -> Hidden
-        hidden = np.dot(self.weights_ih, inputs)
-        hidden = hidden + self.bias_h
-        hidden = np.tanh(hidden)
+        hidden = np.dot(self.weights_ih, inputs) # W_ih * x
+        hidden = hidden + self.bias_h # b_h
+        hidden = np.tanh(hidden) # tanh(...)
         self.last_hidden = hidden.flatten() # Store for viz
 
         # Hidden -> Output
-        output = np.dot(self.weights_ho, hidden)
-        output = output + self.bias_o
-        output = self.softmax(output) 
+        output = np.dot(self.weights_ho, hidden) # W_ho * h
+        output = output + self.bias_o # b_o
+        output = self.softmax(output) # softmax(...)
         self.last_outputs = output.flatten() # Store for viz
 
         return output.flatten()

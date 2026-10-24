@@ -1,0 +1,822 @@
+/*
+ * Pixel theme in the Chrome Dino game's own language: its grey (#535353), its
+ * off-white, square 2px lines and the PressStart2P pixel font throughout.
+ */
+
+:root {
+  --bg: #f7f7f7;
+  --surface: #ffffff;
+  --ink: #535353;
+  --muted: #8f8f8f;
+  --faint: #e3e3e3;
+  --shadow: 4px 4px 0 #dedede;
+  --pos: #2563eb;
+  --neg: #e5484d;
+  --jump: #e07b00;
+  --duck: #7c5cbf;
+  --run: #2f8f5b;
+  --topbar-height: 82px;
+  --pixel: 'PressStart2P', ui-monospace, monospace;
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--bg);
+}
+
+body {
+  min-height: 100vh;
+  color: var(--ink);
+  font-family: var(--pixel);
+  font-size: 10px;
+  line-height: 1.7;
+}
+
+h1,
+h2,
+p,
+dl,
+dd {
+  margin: 0;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+.action-jump { --action: var(--jump); }
+.action-duck { --action: var(--duck); }
+.action-run { --action: var(--run); }
+
+.chip {
+  display: inline-block;
+  padding: 3px 8px;
+  border: 2px solid var(--ink);
+  background: var(--surface);
+  font-size: 8px;
+  white-space: nowrap;
+}
+
+a {
+  color: inherit;
+}
+
+/* GitHub mark, framed like the badges beside it. */
+.icon-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 35px;
+  height: 35px;
+  border: 2px solid var(--ink);
+  background: var(--surface);
+}
+
+.icon-link:hover,
+.icon-link:focus-visible {
+  background: var(--ink);
+  color: var(--surface);
+  outline: none;
+}
+
+.eyebrow {
+  display: block;
+  color: var(--muted);
+  font-size: 8px;
+  text-transform: uppercase;
+}
+
+/* Header */
+.topbar {
+  border-bottom: 2px solid var(--ink);
+  background: var(--surface);
+}
+
+.topbar-inner,
+.app {
+  max-width: 1800px;
+  margin: 0 auto;
+  padding-inline: 24px;
+}
+
+.topbar-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 24px;
+  padding-block: 16px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+#brand-icon {
+  width: 44px;
+  height: 47px;
+  image-rendering: pixelated;
+}
+
+.brand h1 {
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+.brand p {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 9px;
+}
+
+.topbar-badges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.topbar-badges .chip {
+  padding: 8px 12px;
+  font-size: 9px;
+}
+
+.live-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border: 2px solid var(--ink);
+  background: var(--surface);
+  font-size: 9px;
+  white-space: nowrap;
+}
+
+/* A square pixel blinking like the game's text cursor. */
+.live-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--ink);
+  animation: blink 1s steps(1) infinite;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .live-dot {
+    animation: none;
+  }
+}
+
+/* Layout */
+.app {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding-block: 24px;
+}
+
+.card {
+  border: 2px solid var(--ink);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.card h2 {
+  font-size: 12px;
+  font-weight: 400;
+  text-transform: uppercase;
+}
+
+.card-sub {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 8px;
+  line-height: 1.8;
+}
+
+/* Positions the settings popover; sticky (wide screens, below) does too. */
+.network-card {
+  position: relative;
+}
+
+.dashboard {
+  display: grid;
+  grid-template-areas: 'game' 'network' 'decision' 'model' 'training';
+  grid-template-columns: minmax(0, 1fr);
+  gap: 20px;
+}
+
+.area-game { grid-area: game; }
+.area-network { grid-area: network; }
+.area-decision { grid-area: decision; }
+.area-model { grid-area: model; }
+.area-training { grid-area: training; }
+
+.side-card {
+  padding: 18px 20px;
+}
+
+.side-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.side-meta {
+  color: var(--muted);
+  font-size: 8px;
+}
+
+#canvas-container {
+  position: relative;
+  width: 100%;
+  overflow: auto;
+}
+
+/*
+ * Wide screens: the game and the network side by side, so the dino and the
+ * signals it causes are always in view together. The network fills the
+ * viewport's height and stays put while the left column scrolls.
+ */
+@media (min-width: 1200px) {
+  .dashboard {
+    grid-template-areas:
+      'game     network'
+      'decision network'
+      'model    network'
+      'training network';
+    grid-template-columns: clamp(460px, 34vw, 600px) minmax(0, 1fr);
+    grid-template-rows: auto auto auto 1fr;
+    align-items: start;
+  }
+
+  .network-card {
+    position: sticky;
+    top: 24px;
+    display: flex;
+    flex-direction: column;
+    /* Header plus the page's top and bottom padding stay visible. */
+    height: calc(100vh - var(--topbar-height) - 48px);
+    min-height: 560px;
+  }
+
+  /* Centred, so a canvas taller than the card overflows evenly and the
+     drawing, centred in the canvas, lands in the middle of the card. */
+  .network-card #canvas-container {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    min-height: 0;
+    overflow: hidden;
+  }
+}
+
+/* Game */
+.game-stage {
+  position: relative;
+}
+
+#game {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 1;
+  background: var(--bg);
+  image-rendering: pixelated;
+}
+
+#sensors {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.switch {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px;
+  border: 2px solid var(--ink);
+  background: var(--surface);
+  font-size: 8px;
+  cursor: pointer;
+}
+
+.switch-track {
+  position: relative;
+  width: 24px;
+  height: 12px;
+  border: 2px solid var(--ink);
+}
+
+.switch-thumb {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 8px;
+  height: 8px;
+  background: var(--muted);
+}
+
+.switch[aria-pressed='true'] .switch-thumb {
+  left: 12px;
+  background: var(--pos);
+}
+
+.switch:focus-visible {
+  outline: 2px dashed var(--ink);
+  outline-offset: 2px;
+}
+
+/* Hairlines between the stats come from the gap showing the grid's colour. */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2px;
+  border-top: 2px solid var(--ink);
+  background: var(--faint);
+}
+
+.stats > div {
+  min-width: 0;
+  padding: 10px 14px;
+  background: var(--surface);
+}
+
+.stats dt {
+  color: var(--muted);
+  font-size: 8px;
+  text-transform: uppercase;
+}
+
+.stats dd {
+  margin-top: 6px;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+/* Network */
+
+.network-card .card-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px 16px;
+  padding: 18px 20px 8px;
+  border-bottom: 2px dashed var(--faint);
+}
+
+.card-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 16px;
+}
+
+.tool-button {
+  padding: 5px 10px;
+  border: 2px solid var(--ink);
+  background: var(--surface);
+  font-size: 8px;
+  cursor: pointer;
+}
+
+.tool-button[aria-expanded='true'] {
+  background: var(--ink);
+  color: var(--surface);
+}
+
+.tool-button:focus-visible {
+  outline: 2px dashed var(--ink);
+  outline-offset: 2px;
+}
+
+/* The View settings panel opens over the network, under the card's head. */
+.settings-popover {
+  position: absolute;
+  z-index: 2;
+  top: 64px;
+  right: 16px;
+  width: min(340px, calc(100% - 32px));
+  overflow-y: auto;
+  padding: 16px 18px;
+  border: 2px solid var(--ink);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.settings-popover[hidden] {
+  display: none;
+}
+
+/* The button replaces the panel's own collapsible header. */
+.settings-popover #neuro-custom-controls > .neuro-header {
+  display: none;
+}
+
+.settings-popover #neuro-controls-content {
+  max-height: none;
+  overflow: visible;
+  opacity: 1;
+  padding: 0;
+}
+
+.legend {
+  display: flex;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  font-size: 8px;
+  list-style: none;
+}
+
+.legend[hidden] {
+  display: none;
+}
+
+.legend li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.swatch {
+  width: 12px;
+  height: 4px;
+}
+
+.swatch-pos {
+  background: var(--pos);
+}
+
+.swatch-neg {
+  background: var(--neg);
+}
+
+#brainCanvas {
+  display: block;
+  cursor: grab;
+}
+
+#brainCanvas:active {
+  cursor: grabbing;
+}
+
+.net-tip {
+  position: absolute;
+  z-index: 1;
+  max-width: 300px;
+  padding: 8px 10px;
+  border: 2px solid var(--ink);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  font-size: 8px;
+  line-height: 2;
+  pointer-events: none;
+}
+
+.net-tip div:first-child {
+  font-size: 9px;
+}
+
+.net-tip div + div {
+  color: var(--muted);
+}
+
+.canvas-hint {
+  padding: 10px 20px 12px;
+  border-top: 2px dashed var(--faint);
+  color: var(--muted);
+  font-size: 8px;
+}
+
+@media (hover: none) {
+  .canvas-hint {
+    display: none;
+  }
+}
+
+/* Decision */
+.now {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.now strong {
+  display: block;
+  margin-top: 8px;
+  font-size: 24px;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.now-confidence {
+  text-align: right;
+}
+
+.decision {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.decision-row {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr) 40px;
+  align-items: center;
+  gap: 12px;
+  color: var(--muted);
+}
+
+.decision-row.chosen {
+  color: var(--ink);
+}
+
+.decision-row.chosen .decision-name::before {
+  content: '▶ ';
+}
+
+/* Bars made of pixel blocks. */
+.decision-bar {
+  height: 12px;
+  background: repeating-linear-gradient(90deg, var(--faint) 0 6px, transparent 6px 8px);
+}
+
+.decision-fill {
+  display: block;
+  width: 0;
+  height: 100%;
+  background: repeating-linear-gradient(90deg, var(--action) 0 6px, transparent 6px 8px);
+  opacity: 0.45;
+  transition: width 120ms steps(4);
+}
+
+.decision-row.chosen .decision-fill {
+  opacity: 1;
+}
+
+.decision-value {
+  text-align: right;
+}
+
+.strip-head,
+.chart-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 6px 12px;
+  margin-top: 18px;
+  color: var(--muted);
+  font-size: 8px;
+}
+
+.strip-legend,
+.chart-legend {
+  display: flex;
+  gap: 10px;
+}
+
+.strip-legend span,
+.chart-legend span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.strip-legend i {
+  width: 8px;
+  height: 8px;
+  background: var(--action);
+}
+
+.strip {
+  display: grid;
+  grid-template-columns: repeat(75, minmax(0, 1fr));
+  gap: 1px;
+  height: 20px;
+  margin-top: 8px;
+  background: var(--faint);
+  border: 2px solid var(--faint);
+}
+
+/* Training */
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.kpis dt {
+  color: var(--muted);
+  font-size: 8px;
+  text-transform: uppercase;
+}
+
+.kpis dd {
+  margin-top: 6px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.chart-legend i {
+  width: 12px;
+  height: 3px;
+}
+
+.key-record {
+  background: var(--ink);
+}
+
+.key-best {
+  background: var(--pos);
+}
+
+.key-avg {
+  background: #b9b9b9;
+}
+
+.chart {
+  margin-top: 8px;
+}
+
+.chart svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.chart text {
+  fill: var(--muted);
+  font-family: var(--pixel);
+  font-size: 6px;
+}
+
+.chart .grid {
+  stroke: var(--faint);
+  stroke-dasharray: 2 2;
+}
+
+.chart polyline {
+  fill: none;
+  stroke-linejoin: miter;
+}
+
+.chart .avg {
+  stroke: #b9b9b9;
+  stroke-width: 1.5;
+}
+
+.chart .best {
+  stroke: var(--pos);
+  stroke-width: 1.5;
+}
+
+.chart .record {
+  stroke: var(--ink);
+  stroke-width: 2;
+}
+
+.chart .dot {
+  fill: var(--surface);
+  stroke: var(--ink);
+  stroke-width: 2;
+}
+
+/* Model */
+.chain {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 14px;
+  color: var(--muted);
+}
+
+.facts {
+  display: flex;
+  flex-direction: column;
+  margin-top: 12px;
+}
+
+.facts > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 0;
+  font-size: 9px;
+}
+
+.facts > div + div {
+  border-top: 2px dashed var(--faint);
+}
+
+.facts dt {
+  color: var(--muted);
+}
+
+.facts dd {
+  text-align: right;
+}
+
+/* How it works */
+.about {
+  padding: 20px;
+}
+
+.about-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px 28px;
+  margin-top: 16px;
+}
+
+.about h3 {
+  margin: 0;
+  font-size: 10px;
+  font-weight: 400;
+  text-transform: uppercase;
+}
+
+.about p {
+  margin: 10px 0 0;
+  color: #6f6f6f;
+  font-size: 9px;
+  line-height: 2;
+}
+
+.footer {
+  max-width: 1800px;
+  margin: 0 auto;
+  padding: 0 24px 28px;
+  color: var(--muted);
+  font-size: 8px;
+  line-height: 2;
+}
+
+.footer p {
+  margin: 0;
+}
+
+@media (max-width: 640px) {
+  .topbar-inner,
+  .app,
+  .footer {
+    padding-inline: 16px;
+  }
+
+  .app {
+    gap: 16px;
+    padding-block: 16px;
+  }
+
+  .brand h1 {
+    font-size: 16px;
+  }
+
+  .live-badge {
+    white-space: normal;
+  }
+
+  .stats > div {
+    padding: 10px 10px;
+  }
+
+  .stats dd {
+    font-size: 11px;
+  }
+
+  .now strong {
+    font-size: 20px;
+  }
+
+  .kpis dd {
+    font-size: 10px;
+  }
+}

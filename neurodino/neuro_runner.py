@@ -39,6 +39,7 @@ class NeuroRunner(Runner):
         self.best_distance = 0
         self.best_global_score = 0 # Track all-time best for safe saving
         self.brain_file = "best_brain.pkl"
+        self.rendering = True  # Default to rendering enabled
         
         # Initialize CSV Log
         self.log_file = "training_log.csv"
@@ -62,6 +63,11 @@ class NeuroRunner(Runner):
         # We need to re-initialize population properly
         self.watching_dino = None
         self._init_population()
+
+    def set_rendering(self, enabled: bool):
+        """Toggle rendering to save resources."""
+        self.rendering = enabled
+
 
     def _init_components(self) -> None:
         """Override to prevent creating a default single Trex."""
@@ -292,19 +298,28 @@ class NeuroRunner(Runner):
 
 
         # 2. Physics & Logic
-        self.screen.fill((247, 247, 247))
+        if self.rendering:
+            self.screen.fill((247, 247, 247))
 
         if self.playing:
             self.running_time += delta
 
         has_obstacles = self.running_time > self.config.clearTime
         # Apply speed_scale to horizon update (affects Clouds/Ground scroll per frame)
+        # Note: Horizon.update might draw internally depending on implementation, 
+        # but we can't easily stop it without modifying pydino.
         self.horizon.update(delta, self.current_speed * speed_scale, has_obstacles, False)
 
-        if self.playing:
-            self.distance_meter.update(delta, math.ceil(self.distance_ran))
+        if self.rendering:
+            if self.playing:
+                self.distance_meter.update(delta, math.ceil(self.distance_ran))
+            else:
+                 self.distance_meter.update(0, math.ceil(self.distance_ran))
         else:
-             self.distance_meter.update(0, math.ceil(self.distance_ran))
+            # Still need to update distance state even if not drawing? 
+            # actually distance_meter.update does logic like score calc?
+            # Usually only drawing. Distance ran is tracked in self.distance_ran
+            pass
 
         # Draw Logic: Sticky Camera (Prevents flickering)
         if not hasattr(self, "watching_dino"):
@@ -326,7 +341,7 @@ class NeuroRunner(Runner):
 
         # Draw Logic: Manual Smart Draw
         # We manually fetch the correct animation frame and draw ONCE.
-        if self.watching_dino and self.watching_dino.status != TrexStatus.CRASHED:
+        if self.rendering and self.watching_dino and self.watching_dino.status != TrexStatus.CRASHED:
             try:
                 # 1. Temporarily enable drawing
                 self.watching_dino.visible = True
@@ -371,10 +386,11 @@ class NeuroRunner(Runner):
                     self.current_speed += self.config.acceleration
 
         # 5. Draw Stats
-        self._draw_overlay(alive_count if 'alive_count' in locals() else 0)
+        if self.rendering:
+            self._draw_overlay(alive_count if 'alive_count' in locals() else 0)
         
         # 6. Draw Brain Visualization
-        if self.watching_dino and self.watching_dino.status != TrexStatus.CRASHED:
+        if self.rendering and self.watching_dino and self.watching_dino.status != TrexStatus.CRASHED:
              self._draw_brain(self.watching_dino.brain)
 
     def _draw_overlay(self, alive_count):
