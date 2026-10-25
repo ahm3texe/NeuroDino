@@ -93,6 +93,10 @@ npm run dev
 
 `npm run build` advances the checkpoint and writes the static site to `dist/`.
 
+The link preview image, `public/og-image.png`, is drawn by
+`scripts/og_image.py` from the sprite sheet, the font and the model; the page's
+Open Graph tags and the Space's `thumbnail` point to it.
+
 The site is live at https://huggingface.co/spaces/ahm3texe/neurodino. The
 workflow uploads with Hugging Face Trusted Publishers: the Space's settings
 trust this repository's `main` branch and `deploy.yml`, so no token is
