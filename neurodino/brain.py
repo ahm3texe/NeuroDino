@@ -66,7 +66,7 @@ class Brain:
         new_brain.bias_o = self.bias_o.copy()
         return new_brain
 
-    def mutate(self, rate: float):
+    def mutate(self, rate: float, shock_rate: float = 0.08):
         """
         Adaptive mutation with intelligent parameter tweaking.
         
@@ -81,9 +81,8 @@ class Brain:
         # rate=0.02 → sigma=0.05 (very gentle)
         sigma = 0.05 + (rate * 0.5)  # Range: 0.05 to 0.175
         
-        # Increased shock rate: 8% to allow more exploration
-        # This helps escape local optima while still preserving most good solutions
-        shock_rate = 0.08
+        # shock_rate (8% by default): share of mutated weights replaced by a
+        # fresh value instead of nudged, to escape local optima
         
         def mutate_val(val):
             if np.random.random() < rate:

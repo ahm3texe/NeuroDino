@@ -115,7 +115,6 @@ export function drawTrainingChart() {
   const log = parseLog(trainingLog);
   const last = log[log.length - 1]!;
   const record = log.find(g => g.best === last.bestSoFar)!;
-  setText(byId('train-generations'), String(last.generation));
 
   const width = 300;
   const height = 130;

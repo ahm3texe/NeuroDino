@@ -19,6 +19,12 @@ env/
 node_modules/
 dist/
 
+# Built from evaluation/evaluate.ts
+evaluation/evaluate.mjs
+
+# main_train.py's default output
+runs/train/
+
 # A copy of Chromium's own dino_game sources, kept locally for reference.
 # The project links to Chromium instead of redistributing it.
 webdino/
@@ -31,3 +37,9 @@ runs/dino-train-*/
 
 # Google Sans is not openly licensed and nothing uses it
 neurodino/assets/fonts/Google-Sans-Text-Regular.ttf
+
+# Built from evaluation/evaluate.ts
+evaluation/evaluate.mjs
+
+# main_train.py's default output
+runs/train/

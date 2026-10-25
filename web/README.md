@@ -8,7 +8,9 @@ in sync, with nothing streamed: each browser computes it.
 
 - The game is a TypeScript port of `pydino/` and `watch_model.py`, with
   Chrome's normal obstacle gaps as in training (`watch_model.py` and the old
-  Gradio demo doubled them, as Chrome does only in its audio-cue mode). It is
+  Gradio demo doubled them, as Chrome does only in its audio-cue mode). Each
+  frame the obstacles move and then the network decides, as in the trainer
+  (`neurodino/episode.py`), which was checked to play the same games. It is
   fully deterministic: a seeded RNG (`src/determinism.ts`) replaces
   `Math.random`, and `exp`/`tanh` use only basic arithmetic, so every browser
   engine produces bit-identical frames (checked on V8 and JavaScriptCore).
@@ -60,9 +62,9 @@ does in its own dark theme.
   frame as the game; the visualizer no longer eases between values, which the
   Space did because it only received a few updates a second.
 - **Model Information**: 12 → 48 (tanh) → 3 (softmax), 771 parameters.
-- **Training**: best and average score of each generation from
-  `src/assets/training-log.csv` (a copy of `training_log.csv`), on a log scale.
-  The page plays the record holder, from generation 77 (547,287).
+- **Training**: best and average score of each generation of the first run,
+  from `src/assets/training-log.csv` (a copy of `training_log.csv`), on a log
+  scale. The page plays the model from the second run, v2.
 
 On screens 1200px and wider the game and the cards sit next to the network,
 which fills the viewport's height and stays in view, so the dino and the
@@ -100,20 +102,15 @@ stored.
 
 ## Updating the model
 
-After training a new `best_brain.pkl`, export it from the project root:
+After training (`main_train.py` writes `runs/train/best_brain.pkl`), copy the
+new model to `best_brain.pkl` in the project root and export it:
 
 ```bash
 python export_best_brain.py --output web/src/assets/best-brain.json
 ```
 
-and copy its training log, for the Training card:
-
-```bash
-cp training_log.csv web/src/assets/training-log.csv
-```
-
-The record generation in "How it works" and the run time in the Training card
-are written in `index.html`; update them too.
+The Training card's numbers and the training story in "How it works" are
+written in `index.html`; update them too.
 
 ## Credits
 

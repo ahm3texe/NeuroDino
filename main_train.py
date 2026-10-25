@@ -1,138 +1,165 @@
-import os
-import sys
+#!/usr/bin/env python3
+"""Trains the network with a genetic algorithm.
+
+Every generation, each network plays the same few games, one per seed, the
+way the website plays them (neurodino/episode.py); the games run in parallel.
+A network's fitness is its mean score, with every game cut off after
+--minutes of game time. Then the next generation is bred (neurodino/genetics.py).
+
+Training starts from a saved network (--start, by default best_brain.pkl: the
+best plus mutated copies of it) or from random weights (--start random). The
+seeds follow from --seed, so a run can be repeated exactly. Everything goes
+to --out: the log, the best network of every generation, and at the end the
+network that scores best on separate validation games.
+
+    python main_train.py --generations 40
+"""
 import argparse
-import math
+import csv
+import os
+import pickle
+import random
+import sys
+import time
+from multiprocessing import Pool
+from pathlib import Path
+
 import numpy as np
-import pygame
 
-# Add pydino directory to sys.path so that internal imports (e.g. 'from constants import FPS') work
-pydino_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "pydino")
-sys.path.append(pydino_path)
+ROOT = Path(__file__).resolve().parent
+sys.path.insert(0, str(ROOT))
+sys.path.append(str(ROOT / "pydino"))
+os.environ.setdefault("SDL_VIDEODRIVER", "dummy")
+os.environ.setdefault("SDL_AUDIODRIVER", "dummy")
 
-from dimensions import Dimensions
-from neurodino.neuro_runner import NeuroRunner
-from pydino.trex import Status
+from neurodino.brain import Brain  # noqa: E402
+from neurodino.genetics import Genetics  # noqa: E402
+
+FPS = 60
+SCORE_PER_PIXEL = 0.025
+VALIDATION_SEEDS = 500_000   # validation games use seeds from here on
+TRAINING_SEEDS = 1_000_000   # training games: TRAINING_SEEDS * --seed onwards
+
+
+def _init_worker():
+    import pygame
+    pygame.init()
+    pygame.display.set_mode((600, 150))
+
+
+def _play(job):
+    from neurodino.episode import play
+    brains, seed, max_frames = job
+    return play(brains, seed, max_frames)
+
+
+def load_brain(path):
+    with open(path, "rb") as f:
+        data = pickle.load(f)
+    return data[0] if isinstance(data, tuple) else data
+
+
+def play_games(pool, brains, seeds, max_frames):
+    """Scores and whether each brain lasted the whole game: one row per game,
+    one column per brain."""
+    games = np.array(pool.map(_play, [(brains, seed, max_frames) for seed in seeds]))
+    return games[:, :, 0] * SCORE_PER_PIXEL, games[:, :, 1].astype(bool)
+
 
 def main():
-    # Parse command line arguments
-    parser = argparse.ArgumentParser(description='NeuroDino Training')
-    parser.add_argument('--headless', action='store_true', 
-                        help='Run in headless mode (no display, maximum speed)')
+    parser = argparse.ArgumentParser(description="Train NeuroDino with a genetic algorithm.")
+    parser.add_argument("--start", default="best_brain.pkl",
+                        help="network to start from, or 'random' (default: best_brain.pkl)")
+    parser.add_argument("--generations", type=int, default=40)
+    parser.add_argument("--population", type=int, default=50)
+    parser.add_argument("--games", type=int, default=10, help="games per generation")
+    parser.add_argument("--minutes", type=float, default=30, help="game time before a game is cut off")
+    parser.add_argument("--mutation", type=float, default=0.05,
+                        help="lowest mutation rate; the rate falls to it as scores grow")
+    parser.add_argument("--shock", type=float, default=0.08,
+                        help="share of mutated weights replaced by a random value instead of nudged")
+    parser.add_argument("--validation-games", type=int, default=100)
+    parser.add_argument("--validation-minutes", type=float, default=30)
+    parser.add_argument("--seed", type=int, default=1)
+    parser.add_argument("--workers", type=int, default=os.cpu_count())
+    parser.add_argument("--out", default="runs/train")
     args = parser.parse_args()
-    
-    # Headless mode setup
-    if args.headless:
-        os.environ['SDL_VIDEODRIVER'] = 'dummy'
-        os.environ['SDL_AUDIODRIVER'] = 'dummy'
-        print("🚀 HEADLESS MODE - No display, maximum training speed")
-    
-    pygame.init()
-    
-    if not args.headless:
-        pygame.display.set_caption("NeuroDino — Training (Generation 1)")
-    
-    # Standard Dino dimensions
-    dims = Dimensions(width=600, height=150)
-    
-    # Window size: Game (150) + Dashboard (500) = 650 (Expanded for 32 Neurons)
-    screen = pygame.display.set_mode((dims.width, 650))
-    clock = pygame.time.Clock()
-    
-    # Headless mode: unlimited FPS, no display updates
-    if args.headless:
-        target_fps = 0  # Unlimited
+
+    random.seed(args.seed)
+    np.random.seed(args.seed)
+    out = Path(args.out)
+    out.mkdir(parents=True, exist_ok=True)
+    max_frames = int(args.minutes * 60 * FPS)
+
+    genetics = Genetics(args.population)
+    if args.start == "random":
+        genetics.create_random_population(input_size=12, hidden_size=48, output_size=3)
+        population = genetics.genomes
     else:
-        target_fps = 60  # Default to 60 FPS (Standard)
-    
-    fps_modes = [60, 480, 0, -1]  # Visual, Fast, Unlimited, Headless Train
-    current_fps_index = 0
-    
-    # Note: NeuroRunner(target_fps=60) means physics runs at 16ms steps.
-    # If we tick at 60, it's 1x speed. If we tick at 480, it's 8x speed (Training).
-    # If we tick at 0, it's unlimited (Maximum hardware speed).
-    runner = NeuroRunner(screen, dims, pop_size=50, target_fps=60)
-    runner.start()  # Start playing state
-    if args.headless:
-        # Nothing is shown, so skip drawing the game and the brain every step;
-        # the simulation is unaffected. Drawing to the dummy display kept
-        # --headless at a few hundred steps per second.
-        runner.set_rendering(False)
-    
-    running = True
-    last_gen = 0
-    last_log_time = pygame.time.get_ticks()
-    frame_count = 0 
-    
-    while running:
-        # Unlimited mode: don't sleep
-        if target_fps == 0 or target_fps == -1:
-            clock.tick()
-        else:
-            clock.tick(target_fps)
-        
-        frame_count += 1
-        
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_s:
-                # Cycle through FPS modes
-                current_fps_index = (current_fps_index + 1) % len(fps_modes)
-                target_fps = fps_modes[current_fps_index]
-                
-                if target_fps == 60:
-                    print("Speed: Normal (60 FPS)")
-                elif target_fps == 480:
-                    print("Speed: Fast (480 FPS)")
-                elif target_fps == 0:
-                    print("Speed: UNLIMITED (Max Hardware)")
-                else:
-                    print("Speed: HEADLESS SIMULATION (No Rendering)")
+        # The starting network and copies of it mutated at the GA's lowest
+        # rate: stronger mutation breaks most copies of a trained network.
+        start = load_brain(args.start)
+        population = [start.copy()]
+        for _ in range(args.population - 1):
+            child = start.copy()
+            child.mutate(0.05, args.shock)
+            population.append(child)
 
-                # Apply rendering state
-                if target_fps == -1:
-                    runner.set_rendering(False)
-                    # For logic, we behave like unlimited
-                else:
-                    runner.set_rendering(True)
-        
-        runner.update()
-        
-        # Headless mode (CLI arg or Runtime Toggle): skip display updates
-        if args.headless or target_fps == -1:
-            # Progress indicator every 10 seconds (Runtime Feedback)
-            current_time = pygame.time.get_ticks()
-            if current_time - last_log_time > 1000  : # 10 seconds
-                elapsed_seconds = (current_time - last_log_time) / 1000.0
-                real_fps = int(frame_count / elapsed_seconds)
-                
-                print(f"  [Progress] Gen {runner.generation} | Best: {runner.best_global_score} | SPS: {real_fps} (Sim/Sec)")
-                
-                last_log_time = current_time
-                frame_count = 0
-        else:
-            pygame.display.flip()
-            
-            # Display FPS mode in title
-            try:
-                raw_fps = clock.get_fps()
-                safe_fps = int(raw_fps) if not math.isinf(raw_fps) else 99999
-            except OverflowError:
-                safe_fps = 99999
+    log_path = out / "training_log.csv"
+    with log_path.open("w", newline="") as f:
+        csv.writer(f).writerow(["Generation", "Best", "Average", "Median", "Best_Worst_Game",
+                                "Full_Games", "Mutation_Rate", "Seconds"])
 
-            if target_fps == 0:
-                fps_text = f"UNLIMITED ({safe_fps})"
-            elif target_fps == -1:
-                fps_text = f"HEADLESS ({safe_fps})"
-            else:
-                fps_text = str(target_fps)
-            
-            # Count alive using Status.CRASHED
-            alive_count = sum(1 for d in runner.population if d.status != Status.CRASHED)
-            
-            pygame.display.set_caption(f"NeuroDino — Gen {runner.generation} | Alive: {alive_count} | FPS: {fps_text}")
+    record = 0.0
+    best_per_generation = []
+    with Pool(args.workers, initializer=_init_worker) as pool:
+        for generation in range(1, args.generations + 1):
+            started = time.time()
+            first = TRAINING_SEEDS * args.seed + (generation - 1) * args.games
+            scores, lasted = play_games(pool, population, range(first, first + args.games), max_frames)
+            fitness = scores.mean(axis=0)
+            best = int(np.argmax(fitness))
+            record = max(record, float(fitness[best]))
+            full = float(lasted.mean())
+            rate = max(args.mutation, min(0.25, 0.20 * 0.995 ** generation / (1 + record / 2000)))
 
-    pygame.quit()
+            brain = population[best].copy()
+            best_per_generation.append((generation, brain))
+            with (out / f"generation_{generation:03d}.pkl").open("wb") as f:
+                pickle.dump((brain, float(fitness[best])), f)
+            seconds = time.time() - started
+            with log_path.open("a", newline="") as f:
+                csv.writer(f).writerow([generation, round(float(fitness[best])), round(float(fitness.mean())),
+                                        round(float(np.median(fitness))), round(float(scores[:, best].min())),
+                                        round(full, 3), round(rate, 4), round(seconds, 1)])
+            print(f"Generation {generation}: best {fitness[best]:,.0f} (worst game {scores[:, best].min():,.0f}), "
+                  f"average {fitness.mean():,.0f}, full games {full:.0%}, {seconds:.0f} s", flush=True)
+
+            population = genetics.evolve_population(list(zip(population, fitness)),
+                                                    generation=generation, best_score=record,
+                                                    min_rate=args.mutation, shock_rate=args.shock)
+
+        # Pick the network that does best on games none of them trained on.
+        if args.validation_games:
+            candidates = [(0, load_brain(args.start))] if args.start != "random" else []
+            candidates += best_per_generation
+            seeds = range(VALIDATION_SEEDS, VALIDATION_SEEDS + args.validation_games)
+            scores, lasted = play_games(pool, [b for _, b in candidates], seeds,
+                                        int(args.validation_minutes * 60 * FPS))
+            fitness = scores.mean(axis=0)
+            full = lasted.mean(axis=0)
+            with (out / "validation.csv").open("w", newline="") as f:
+                writer = csv.writer(f)
+                writer.writerow(["Generation", "Average", "Full_Games"])
+                for (generation, _), value, share in zip(candidates, fitness, full):
+                    writer.writerow([generation, round(float(value)), round(float(share), 3)])
+            best = int(np.argmax(fitness))
+            generation, brain = candidates[best]
+            with (out / "best_brain.pkl").open("wb") as f:
+                pickle.dump((brain, int(round(float(fitness[best])))), f)
+            print(f"Validation: generation {generation} is best, average {fitness[best]:,.0f}, "
+                  f"full games {full[best]:.0%} (generation 0 is the starting network)", flush=True)
+
 
 if __name__ == "__main__":
     main()

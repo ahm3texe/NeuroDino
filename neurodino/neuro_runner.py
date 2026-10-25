@@ -16,17 +16,16 @@ from pydino.trex import Status as TrexStatus
 from .neuro_trex import NeuroTrex
 from .genetics import Genetics
 from .brain import Brain
-
-# Game Constants
-GAME_HEIGHT = 150  # Game window height for Y normalization
-MAX_OBSTACLE_WIDTH = 75  # Maximum realistic obstacle width for better normalization spread
-MAX_TTI_FRAMES = 50.0  # Maximum Time-to-Impact frames for normalization
-DUCK_THRESHOLD_Y = 75  # Obstacles with yPos < this require ducking (high pterodactyl)
+from .sensors import get_inputs
 
 class NeuroRunner(Runner):
     """
     Subclass of Runner that manages a population of NeuroTrex agents.
     Overrides the main game loop to simulate multiple agents simultaneously.
+
+    The runner the first model (v1) was trained with, kept to reproduce it.
+    Its agents decide before the obstacles move each frame, unlike
+    watch_model.py, the website and main_train.py (neurodino/episode.py).
     """
     def __init__(self, screen, dimensions, pop_size=50, target_fps=60):
         # Disable audio cues for training to avoid noise/overhead
@@ -147,112 +146,8 @@ class NeuroRunner(Runner):
             self.trex = self.population[0]
 
     def _get_inputs(self, dino):
-        """
-        12-Input System: "Immortal Vision" (Perfect Information)
-        
-        OBSTACLE INFORMATION:
-        1. Obs1 TTI (Time-to-Impact, 1.0 = imminent danger)
-        2. Obs1 Action (0.0 = JUMP, 1.0 = DUCK needed)
-        3. Obs1 Width (normalized)
-        4. Obs2 TTI
-        5. Obs2 Action  
-        6. Obs2 Width
-        
-        GAME STATE:
-        7. Game Speed (0.0-1.0, normalized to maxSpeed)
-        8. Gap Risk (1.0 = back-to-back obstacles)
-        
-        DINO STATE (Critical for precise timing!):
-        9. Dino Y Position (0.0 = ground, 1.0 = max jump height)
-        10. Dino Velocity (negative = rising, positive = falling)
-        11. Is Airborne (1.0 = in the air)
-        12. Is Ducking (1.0 = currently ducking)
-        
-        IMMORTALITY LOGIC:
-        - AI knows exactly where dino is in the jump arc
-        - Can time fast-drops precisely
-        - Can decide if there's time to duck after landing
-        """
-        speed = self.current_speed / self.config.maxSpeed
-        
-        # DINO STATE - Critical for immortal play
-        ground_y = dino.groundYPos  # ~93
-        max_jump = dino.config.maxJumpHeight  # ~30
-        
-        # Normalize dino Y: 0.0 = ground, 1.0 = max height
-        dino_y_normalized = 0.0
-        if dino.jumping:
-            height_above_ground = ground_y - dino.yPos
-            dino_y_normalized = min(1.0, max(0.0, height_above_ground / max_jump))
-        
-        # Jump velocity: negative = rising, positive = falling
-        # Normalize to [-1, 1] range (tanh-friendly)
-        dino_velocity = 0.0
-        if dino.jumping:
-            # Typical velocity range is about -10 to +10
-            dino_velocity = max(-1.0, min(1.0, dino.jumpVelocity / 10.0))
-        
-        is_airborne = 1.0 if dino.jumping else 0.0
-        is_ducking = 1.0 if dino.ducking else 0.0
-        
-        # Default values (No obstacles = SAFE)
-        obs1_dist = 0.0
-        obs1_action = 0.0
-        obs1_w = 0.0
-        
-        obs2_dist = 0.0
-        obs2_action = 0.0
-        obs2_w = 0.0
-        
-        gap = 0.0
-        
-        if self.horizon and self.horizon.obstacles:
-            dino_front = dino.xPos
-            
-            future_obstacles = [o for o in self.horizon.obstacles 
-                               if o.xPos > dino_front]
-            future_obstacles.sort(key=lambda o: o.xPos)
-            
-            # --- Obstacle 1 ---
-            if len(future_obstacles) > 0:
-                o1 = future_obstacles[0]
-                dist1 = o1.xPos - dino.xPos
-                
-                tti1 = dist1 / max(1.0, self.current_speed)
-                obs1_dist = 1.0 - min(1.0, tti1 / MAX_TTI_FRAMES)
-                
-                obs1_action = 1.0 if o1.yPos < DUCK_THRESHOLD_Y else 0.0
-                obs1_w = min(1.0, o1.width / MAX_OBSTACLE_WIDTH)
-                
-                # --- Obstacle 2 ---
-                if len(future_obstacles) > 1:
-                    o2 = future_obstacles[1]
-                    dist2 = o2.xPos - dino.xPos
-                    
-                    tti2 = dist2 / max(1.0, self.current_speed)
-                    obs2_dist = 1.0 - min(1.0, tti2 / MAX_TTI_FRAMES)
-                    
-                    obs2_action = 1.0 if o2.yPos < DUCK_THRESHOLD_Y else 0.0
-                    obs2_w = min(1.0, o2.width / MAX_OBSTACLE_WIDTH)
-                    
-                    raw_gap = o2.xPos - (o1.xPos + o1.width)
-                    time_gap = raw_gap / max(1.0, self.current_speed)
-                    gap = 1.0 - min(1.0, time_gap / 15.0)
-        
-        return np.array([
-            obs1_dist,
-            obs1_action,
-            obs1_w,
-            obs2_dist,
-            obs2_action,
-            obs2_w,
-            speed,
-            gap,
-            dino_y_normalized,  # NEW: Where is dino in jump arc?
-            dino_velocity,       # NEW: Rising or falling?
-            is_airborne,
-            is_ducking           # NEW: Currently ducking?
-        ])
+        """The network's 12 inputs for one dino; see neurodino/sensors.py."""
+        return get_inputs(self, dino)
 
     def update(self) -> None:
         """

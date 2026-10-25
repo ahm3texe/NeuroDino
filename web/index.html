@@ -324,12 +324,12 @@
             <span class="chip">Genetic algorithm</span>
           </div>
           <dl class="kpis">
-            <div><dt>Generations</dt><dd id="train-generations">83</dd></div>
+            <div><dt>Generations</dt><dd>83 + 40</dd></div>
             <div><dt>Population</dt><dd>50</dd></div>
-            <div><dt>Run time</dt><dd>6.5 h</dd></div>
+            <div><dt>Run time</dt><dd>6.5 h + 1 h</dd></div>
           </dl>
           <div class="chart-head">
-            <span>Score per generation (log)</span>
+            <span>First run: score per generation (log)</span>
           </div>
           <div class="chart" id="training-chart"></div>
           <dl class="chart-readout" id="chart-readout">
@@ -351,7 +351,7 @@
           </div>
           <div>
             <h3>How it learned</h3>
-            <p>No examples and no backpropagation: a genetic algorithm. In each generation 50 networks played the game and their scores decided who had children. The best two carried over unchanged, parents were picked by tournament, their weights were mixed at random and then mutated, less as the generations went on and the scores grew, with an occasional larger shock to get out of dead ends. After 83 generations the record, 547,287 points, belonged to an individual from generation 77. That is the network playing here.</p>
+            <p>No examples and no backpropagation: a genetic algorithm. In each generation 50 networks played and their scores decided who had children: the best two carried over unchanged, parents were picked by tournament, and their weights were mixed at random and mutated. A first run of 83 generations reached a record of 547,287 points, but each generation played a single game, in a game loop that showed the network the obstacles a frame late; on this page that network crashed before top speed in more than half of its games. A second run started from it, in this page's loop, and scored every network on the same 10 games of up to an hour. Its best network is the one playing here: in 200 test games it reached top speed every time, and 190 of them lasted four hours.</p>
           </div>
           <div>
             <h3>Why everyone sees the same game</h3>

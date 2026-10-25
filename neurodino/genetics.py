@@ -64,7 +64,8 @@ class Genetics:
         return candidates[0][0]
 
     def evolve_population(self, old_population_data: List[Tuple[Brain, float]], 
-                          generation: int = 1, best_score: int = 0) -> List[Brain]:
+                          generation: int = 1, best_score: int = 0,
+                          min_rate: float = 0.05, shock_rate: float = 0.08) -> List[Brain]:
         """
         Creates the next generation with ADAPTIVE mutation rates.
         
@@ -109,7 +110,7 @@ class Genetics:
         
         # Final adaptive rate with bounds
         adaptive_rate = base_rate * generation_decay * score_factor
-        adaptive_rate = max(0.05, min(0.25, adaptive_rate))  # Clamp to [0.05, 0.25]
+        adaptive_rate = max(min_rate, min(0.25, adaptive_rate))  # Clamp to [min_rate, 0.25]
         
         # 3. Crossover & Mutation with adaptive rate
         while len(new_population) < self.pop_size:
@@ -117,7 +118,7 @@ class Genetics:
             parent_b = self.select_parent(old_population_data)
             
             child = self.crossover(parent_a, parent_b)
-            child.mutate(adaptive_rate)
+            child.mutate(adaptive_rate, shock_rate)
             new_population.append(child)
 
         self.genomes = new_population

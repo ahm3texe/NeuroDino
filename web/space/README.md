@@ -25,9 +25,13 @@ network's inputs, hidden activations and decisions drawn next to it.
   (jump, duck, run; softmax): 771 parameters, written from scratch.
 - **Training:** a genetic algorithm with 50 networks per generation, the best
   two kept unchanged, tournament selection, uniform crossover and Gaussian
-  mutation that shrinks over the generations and as the scores grow. One 6.5-hour run of 83
-  generations; the record, 547,287 points, was set in generation 77 by the
-  network playing here.
+  mutation. A first run of 83 generations (6.5 hours) set a record of 547,287
+  points, but each generation played a single game, in a loop that showed the
+  network the obstacles a frame late; here it crashed before top speed in more
+  than half of its games. A second run (40 generations, 1 hour) started from
+  it in this page's loop and scored every network on the same 10 games of up
+  to an hour. Its best network plays here: in 200 test games it always
+  reached top speed, and 190 lasted four hours.
 - **Same game for everyone:** nothing is streamed. The game is a
   deterministic port of Chrome's T-Rex runner, so every browser computes the
   same frames; the page starts from a recent snapshot and fast-forwards to the

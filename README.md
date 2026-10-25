@@ -9,12 +9,15 @@ with its network drawn next to it: **[huggingface.co/spaces/ahm3texe/neurodino](
 | Path | What it is |
 | --- | --- |
 | `pydino/` | Chrome's T-Rex runner ported to Python and Pygame from Chromium's [`dino_game`](https://source.chromium.org/chromium/chromium/src/+/main:components/neterror/resources/dino_game/) |
-| `neurodino/` | The network (`brain.py`), the genetic algorithm (`genetics.py`) and the training runner that plays 50 networks at once (`neuro_runner.py`) |
-| `main_train.py` | Trains, resuming from `best_brain.pkl` and `training_log.csv` if they exist |
+| `neurodino/` | The network (`brain.py`), its inputs (`sensors.py`), the genetic algorithm (`genetics.py`) and a game played by many networks at once (`episode.py`); `neuro_runner.py` is the runner the first model was trained with |
+| `main_train.py` | Trains, by default starting from `best_brain.pkl` |
 | `watch_model.py` | Plays a saved model in a window, or with `--silent` without one |
 | `export_best_brain.py` | Exports `best_brain.pkl` to the website's JSON format |
 | `app.py`, `neurodino/web-ui/` | The original Gradio dashboard |
-| `best_brain.pkl`, `training_log.csv`, `runs/`, `backups/` | The trained model, its training log, its TensorBoard logs and every record-setting model |
+| `best_brain.pkl` | The model (v2) |
+| `training_log.csv`, `runs/dino-full-train/`, `backups/` | The first training run: its log, its TensorBoard logs and every record-setting model; v1 is `backups/brain_score_547287.pkl` |
+| `runs/v2/` | The second run's log and validation |
+| `evaluation/` | How the models were tested, with every test game, see [`evaluation/README.md`](evaluation/README.md) |
 | `web/` | The website: the game, the model and the visualizer ported to TypeScript, see [`web/README.md`](web/README.md) |
 
 ## Run
@@ -26,16 +29,17 @@ pip install -r requirements.txt
 python watch_model.py
 ```
 
-Training appends to `training_log.csv` and replaces `best_brain.pkl` when it
-sets a record, so move those aside to start from scratch:
+Training plays every network of a generation on the same few games, in
+parallel, and writes its log, the best network of each generation and the
+network that does best on separate validation games to `runs/train/`. v2
+came from:
 
 ```bash
-python main_train.py --headless
+python main_train.py --start backups/brain_score_547287.pkl --generations 40 --games 10 --minutes 60 --mutation 0.02 --shock 0
 ```
 
-Without `--headless` it opens a window; press `S` to cycle the speed. The
-TensorBoard logs need `pip install tensorboard`, then
-`tensorboard --logdir runs`.
+`--start random` starts from scratch. The first run's TensorBoard logs need
+`pip install tensorboard`, then `tensorboard --logdir runs`.
 
 The website:
 
@@ -53,25 +57,43 @@ width, whether it is the highest bird), the game speed, the gap between the
 obstacles and the dino's own height, vertical speed and whether it is in the
 air or ducking.
 
-Each generation 50 networks play the same game at once; a network's fitness is
-the distance it ran. The best two carry over unchanged, the rest are bred by
-tournament selection (3), uniform crossover and Gaussian mutation whose rate
-falls with the generation and the best score.
+It was trained by a genetic algorithm, in two runs. Each generation has 50
+networks; the best two carry over unchanged, the rest are bred by tournament
+selection (3), uniform crossover and Gaussian mutation.
+
+- **First run (v1):** 83 generations, 6.5 hours, from random weights. Each
+  generation played a single game and a network's fitness was the distance
+  it ran. Its record, 547,287 points, was set in generation 77.
+- **Second run (v2):** 40 generations, 1 hour, starting from v1. Every network
+  played the same 10 games of up to an hour each generation, new games every
+  generation, and its fitness was its mean score; mutation was gentler. The
+  best network of each generation was then scored on 100 validation games, and
+  the best of those is v2.
+
+The first run's runner let the networks decide before the obstacles moved
+each frame, so v1 learned to act on what it saw a frame earlier. The website,
+`watch_model.py` and the Gradio app move the obstacles first, and so does the
+second run.
 
 ## Results
 
-The model in this repository came from a single 6.5-hour run of 83
-generations. Its record, 547,287 points, was set in generation 77. It is also
-on Hugging Face as safetensors, with a model card:
+Each model played 200 fresh games (seeds 1–200) with the website's engine, up
+to four hours each; v2 had never played them before.
+
+| | Ended before top speed | Lasted 4 hours | Crashes at top speed |
+| --- | --- | --- | --- |
+| v1, website loop | 113 | 85 | 1 every ~170 h |
+| v1, its training loop | 5 | 110 | 1 every ~7 h |
+| **v2, website loop** | **0** | **190** | 1 every ~80 h |
+
+In the website's loop v1 jumps a frame early: at intermediate speeds it lands
+on obstacles, while at top speed that frame happens to help. v2 reaches top
+speed in every game, also with the doubled gaps of the Gradio app. Neither
+ever ducks: one input marks only the highest bird, which needs no action, so
+a bird to duck under looks the same as a low one to jump over, and both jump.
+The models are on Hugging Face as safetensors, with a model card:
 [huggingface.co/ahm3texe/neurodino](https://huggingface.co/ahm3texe/neurodino).
-
-Played on fresh games with the website's engine:
-
-- once it reaches top speed it is very robust: in 26 four-hour runs that got
-  there, it never crashed;
-- before that it is not: 56% of 200 games ended while the game was still
-  speeding up, at a score below 1,600;
-- it never ducks; it jumps over every bird.
+Details and every game are in [`evaluation/`](evaluation/README.md).
 
 ## Credits and license
 

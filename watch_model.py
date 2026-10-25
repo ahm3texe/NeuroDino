@@ -29,14 +29,9 @@ from pydino.runner import Runner, Config
 from pydino.trex import Trex, Status as TrexStatus
 from neurodino.neuro_trex import NeuroTrex
 from neurodino.brain import Brain
+from neurodino.sensors import get_inputs
 import numpy as np
 import math
-
-# Constants (must match training)
-GAME_HEIGHT = 150
-MAX_OBSTACLE_WIDTH = 75
-MAX_TTI_FRAMES = 50.0
-DUCK_THRESHOLD_Y = 75
 
 
 class ModelWatcher(Runner):
@@ -81,67 +76,8 @@ class ModelWatcher(Runner):
         self.trex = self.dino  # For compatibility with base Runner
     
     def _get_inputs(self):
-        """Get inputs for the brain (same as training)."""
-        dino = self.dino
-        speed = self.current_speed / self.config.maxSpeed
-        
-        # Dino state
-        ground_y = dino.groundYPos
-        max_jump = dino.config.maxJumpHeight
-        
-        dino_y_normalized = 0.0
-        if dino.jumping:
-            height_above_ground = ground_y - dino.yPos
-            dino_y_normalized = min(1.0, max(0.0, height_above_ground / max_jump))
-        
-        dino_velocity = 0.0
-        if dino.jumping:
-            dino_velocity = max(-1.0, min(1.0, dino.jumpVelocity / 10.0))
-        
-        is_airborne = 1.0 if dino.jumping else 0.0
-        is_ducking = 1.0 if dino.ducking else 0.0
-        
-        # Obstacles
-        obs1_dist = 0.0
-        obs1_action = 0.0
-        obs1_w = 0.0
-        obs2_dist = 0.0
-        obs2_action = 0.0
-        obs2_w = 0.0
-        gap = 0.0
-        
-        if self.horizon and self.horizon.obstacles:
-            dino_front = dino.xPos
-            future_obstacles = [o for o in self.horizon.obstacles if o.xPos > dino_front]
-            future_obstacles.sort(key=lambda o: o.xPos)
-            
-            if len(future_obstacles) > 0:
-                o1 = future_obstacles[0]
-                dist1 = o1.xPos - dino.xPos
-                tti1 = dist1 / max(1.0, self.current_speed)
-                obs1_dist = 1.0 - min(1.0, tti1 / MAX_TTI_FRAMES)
-                obs1_action = 1.0 if o1.yPos < DUCK_THRESHOLD_Y else 0.0
-                obs1_w = min(1.0, o1.width / MAX_OBSTACLE_WIDTH)
-                
-                if len(future_obstacles) > 1:
-                    o2 = future_obstacles[1]
-                    dist2 = o2.xPos - dino.xPos
-                    tti2 = dist2 / max(1.0, self.current_speed)
-                    obs2_dist = 1.0 - min(1.0, tti2 / MAX_TTI_FRAMES)
-                    obs2_action = 1.0 if o2.yPos < DUCK_THRESHOLD_Y else 0.0
-                    obs2_w = min(1.0, o2.width / MAX_OBSTACLE_WIDTH)
-                    
-                    raw_gap = o2.xPos - (o1.xPos + o1.width)
-                    time_gap = raw_gap / max(1.0, self.current_speed)
-                    gap = 1.0 - min(1.0, time_gap / 15.0)
-        
-        return np.array([
-            obs1_dist, obs1_action, obs1_w,
-            obs2_dist, obs2_action, obs2_w,
-            speed, gap,
-            dino_y_normalized, dino_velocity,
-            is_airborne, is_ducking
-        ])
+        """Get inputs for the brain (same as training); see neurodino/sensors.py."""
+        return get_inputs(self, self.dino)
     
     def update(self):
         """Game loop with AI control."""
