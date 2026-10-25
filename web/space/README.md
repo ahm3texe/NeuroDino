@@ -23,7 +23,7 @@ network's inputs, hidden activations and decisions drawn next to it.
   (jump, duck, run; softmax): 771 parameters, written from scratch.
 - **Training:** a genetic algorithm with 50 networks per generation, the best
   two kept unchanged, tournament selection, uniform crossover and Gaussian
-  mutation that shrinks as the scores grow. One 6.5-hour run of 83
+  mutation that shrinks over the generations and as the scores grow. One 6.5-hour run of 83
   generations; the record, 547,287 points, was set in generation 77 by the
   network playing here.
 - **Same game for everyone:** nothing is streamed. The game is a

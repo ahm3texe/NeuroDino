@@ -66,7 +66,7 @@ export class Obstacle {
 
     this.gap = this.getGap(this.gapCoefficient, speed);
 
-    // Runner(use_audio=True) doubles every gap; watch_model.py runs that way.
+    // Chrome's audio-cue mode (Runner(use_audio=True)) doubles every gap.
     if (this.hasAudioCues) {
       this.gap *= 2;
     }

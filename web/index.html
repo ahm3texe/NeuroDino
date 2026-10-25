@@ -350,11 +350,11 @@
         <div class="about-grid">
           <div>
             <h3>What it sees</h3>
-            <p>Every frame the network reads 12 numbers from the game: how close the next two obstacles are, how wide they are and whether they are high birds to duck under, the gap between them, the game speed, and the dino's own height, vertical speed and whether it is in the air or ducking. 48 hidden neurons (tanh) turn them into three probabilities, jump, duck and run, and the dino does the likeliest. Turn on Sensors to see the distances, and hover a neuron to see what it does.</p>
+            <p>Every frame the network reads 12 numbers from the game: how close the next two obstacles are, how wide they are, whether each is the highest bird (one that flies over a running dino), the gap between them, the game speed, and the dino's own height, vertical speed and whether it is in the air or ducking. 48 hidden neurons (tanh) turn them into three probabilities, jump, duck and run, and the dino does the likeliest. Turn on Sensors to see the distances, and hover a neuron to see what it does.</p>
           </div>
           <div>
             <h3>How it learned</h3>
-            <p>No examples and no backpropagation: a genetic algorithm. In each generation 50 networks played the game and their scores decided who had children. The best two carried over unchanged, parents were picked by tournament, their weights were mixed at random and then mutated, less as the scores grew, with an occasional larger shock to get out of dead ends. After 83 generations the record, 547,287 points, belonged to an individual from generation 77. That is the network playing here.</p>
+            <p>No examples and no backpropagation: a genetic algorithm. In each generation 50 networks played the game and their scores decided who had children. The best two carried over unchanged, parents were picked by tournament, their weights were mixed at random and then mutated, less as the generations went on and the scores grew, with an occasional larger shock to get out of dead ends. After 83 generations the record, 547,287 points, belonged to an individual from generation 77. That is the network playing here.</p>
           </div>
           <div>
             <h3>Why everyone sees the same game</h3>

@@ -62,9 +62,11 @@ export class ModelWatcher {
     rng.setState(new Rng('seed' in start ? start.seed : 0).getState());
     this.screen = new Surface(GAME_WIDTH, GAME_HEIGHT, canvas);
     this.screen.fill(BACKGROUND);
-    // Runner(use_audio=True) => hasAudioCues, which doubles obstacle gaps.
+    // Normal obstacle gaps, as in training (NeuroRunner, use_audio=False) and
+    // in Chrome. watch_model.py and the Gradio demo ran with use_audio=True,
+    // Chrome's audio-cue mode, which doubles every gap.
     this.horizon = new Horizon(
-        this.screen, LDPI, GAME_WIDTH, CONFIG.gapCoefficient, sprites.alpha, true);
+        this.screen, LDPI, GAME_WIDTH, CONFIG.gapCoefficient, sprites.alpha, false);
     this.distanceMeter =
         new DistanceMeter(this.screen, LDPI.textSprite, GAME_WIDTH, sprites.alpha);
     this.setupNeuroTrex();

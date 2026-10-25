@@ -6,10 +6,12 @@ in sync, with nothing streamed: each browser computes it.
 
 ## How everyone sees the same game
 
-- The game is a TypeScript port of `pydino/` and `watch_model.py`. It is fully
-  deterministic: a seeded RNG (`src/determinism.ts`) replaces `Math.random`,
-  and `exp`/`tanh` use only basic arithmetic, so every browser engine produces
-  bit-identical frames (checked on V8 and JavaScriptCore).
+- The game is a TypeScript port of `pydino/` and `watch_model.py`, with
+  Chrome's normal obstacle gaps as in training (`watch_model.py` and the old
+  Gradio demo doubled them, as Chrome does only in its audio-cue mode). It is
+  fully deterministic: a seeded RNG (`src/determinism.ts`) replaces
+  `Math.random`, and `exp`/`tanh` use only basic arithmetic, so every browser
+  engine produces bit-identical frames (checked on V8 and JavaScriptCore).
 - Frame N of the shared game belongs to wall-clock time `epoch + N / 60 s`.
 - `src/timeline/checkpoint.json` holds the full game state at a recent frame.
   A viewer loads it, simulates the time since then (under a second for an
@@ -20,7 +22,9 @@ in sync, with nothing streamed: each browser computes it.
   `space/README.md` as its README, so checkpoints stay fresh. It squashes the
   Space's history once a day, since every upload adds a new bundle.
 - If the model or engine sources change, the checkpoint's fingerprint no longer
-  matches and a new shared game starts.
+  matches and a new shared game starts. To carry the current game over an engine
+  change instead, advance the live checkpoint with the old engine, then write
+  the new fingerprint into it (done when the gaps went back to normal).
 
 The model, sprites, font, visualizer and training log are all inside the JS
 bundle, so
