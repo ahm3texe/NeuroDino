@@ -168,7 +168,8 @@ function makeControlsAccessible() {
  * The visualizer starts with the Space's plain grey edges; 720 of them at full
  * opacity read as a dark mass. Start with what the panel's checkboxes show
  * instead: grey Bézier edges for only the signal flowing right now (weight ×
- * activation). The smooth factors are set too, so nothing animates on load.
+ * activation), pixel neurons, no bias dots. The smooth factors are set too, so
+ * nothing animates on load.
  */
 function applyDefaultView() {
   Object.assign(window, {
@@ -183,8 +184,10 @@ function applyDefaultView() {
     posColor: '#2563eb',
     negColor: '#e5484d',
     nodeBorderColor: '#535353',
-    edgeWidth: 0.6,
-    smoothEdgeWidth: 0.6,
+    edgeWidth: 1,
+    smoothEdgeWidth: 1,
+    usePixelNodes: true,
+    showBiases: false,
     edgeOpacity: 0.5,
     smoothEdgeOpacity: 0.5,
   });

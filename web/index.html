@@ -38,6 +38,9 @@
             <canvas id="game" width="600" height="150" role="img"
                     aria-label="Neural network playing the Chrome Dino game"></canvas>
             <canvas id="sensors" aria-hidden="true"></canvas>
+          </div>
+          <div class="game-toolbar">
+            <span>What the network sees</span>
             <button type="button" class="switch" id="sensor-toggle" aria-pressed="true">
               <span class="switch-track"><span class="switch-thumb"></span></span>
               Sensors
@@ -126,9 +129,9 @@
                     <div class="neuro-row">
                       <span class="neuro-label">Width</span>
                       <div class="neuro-slider-container">
-                        <input type="range" class="neuro-slider" min="0" max="3" step="0.1" value="0.6"
+                        <input type="range" class="neuro-slider" min="0" max="3" step="0.1" value="1"
                                oninput="updateNeuroVal('edgeWidth', this.value, 'val_edgeWidth')">
-                        <span id="val_edgeWidth" class="neuro-value">0.6</span>
+                        <span id="val_edgeWidth" class="neuro-value">1</span>
                       </div>
                     </div>
                     <div class="neuro-row">
@@ -149,11 +152,11 @@
                   </div>
                   <div id="group-nodes" class="neuro-group" style="max-height: 0px; opacity: 0; margin-bottom: 0px;">
                     <div class="neuro-row neuro-checkbox-wrapper" onclick="toggleNeuroCheck('pixel_check', 'usePixelNodes')">
-                      <div id="neuro_pixel_check" class="neuro-checkbox"></div>
+                      <div id="neuro_pixel_check" class="neuro-checkbox checked"></div>
                       <span class="neuro-label">Pixel neurons</span>
                     </div>
                     <div class="neuro-row neuro-checkbox-wrapper" onclick="toggleNeuroCheck('bias_check', 'showBiases')">
-                      <div id="neuro_bias_check" class="neuro-checkbox checked"></div>
+                      <div id="neuro_bias_check" class="neuro-checkbox"></div>
                       <span class="neuro-label">Show biases</span>
                     </div>
                     <div class="neuro-row neuro-checkbox-wrapper" onclick="toggleNeuroCheck('activation_color_check', 'useNodeActivationColor')">
