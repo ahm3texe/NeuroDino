@@ -29,7 +29,10 @@ nothing can fail to load once the page is open.
 ## Interface
 
 A dashboard in the game's own look: its grey (#535353) and off-white, square
-2px lines and the PressStart2P pixel font.
+2px lines and the PressStart2P pixel font. It follows the system's light or dark
+mode; the moon/sun button in the header switches it and the choice is
+remembered in the browser. In dark mode the game is shown inverted, as Chrome
+does in its own dark theme.
 
 - **Game** with a sensor overlay (toggle "Sensors"): the rays to the next two
   obstacles and the dino's height, labelled with the input values they give

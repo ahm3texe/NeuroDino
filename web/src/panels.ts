@@ -4,10 +4,11 @@
 import trainingLog from './assets/training-log.csv?raw';
 import type {ModelWatcher} from './watcher.js';
 
+// CSS colours, so they follow light and dark mode.
 export const ACTIONS = [
-  {name: 'JUMP', color: '#e07b00'},
-  {name: 'DUCK', color: '#7c5cbf'},
-  {name: 'RUN', color: '#2f8f5b'},
+  {name: 'JUMP', color: 'var(--jump)'},
+  {name: 'DUCK', color: 'var(--duck)'},
+  {name: 'RUN', color: 'var(--run)'},
 ];
 
 const numberFormat = new Intl.NumberFormat('en-US');

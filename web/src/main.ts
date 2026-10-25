@@ -181,9 +181,6 @@ function applyDefaultView() {
     smoothPropOpacityFactor: 1,
     showActiveEdgesOnly: true,
     smoothActiveFactor: 1,
-    posColor: '#2563eb',
-    negColor: '#e5484d',
-    nodeBorderColor: '#535353',
     edgeWidth: 1,
     smoothEdgeWidth: 1,
     usePixelNodes: true,
@@ -191,6 +188,62 @@ function applyDefaultView() {
     edgeOpacity: 0.5,
     smoothEdgeOpacity: 0.5,
   });
+}
+
+const THEME_KEY = 'neurodino-theme';
+const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+
+/** A saved choice (data-theme, set in index.html) wins over the system's. */
+function isDark(): boolean {
+  const theme = document.documentElement.dataset['theme'];
+  return theme ? theme === 'dark' : prefersDark.matches;
+}
+
+// The visualizer draws with these; the panel's colour pickers show them.
+const VISUALIZER_COLORS = {
+  light: {
+    labelColor: '#535353', defaultEdgeColor: '#505050', nodeColor: '#ffffff',
+    nodeBorderColor: '#535353', posColor: '#2563eb', negColor: '#e5484d',
+    activationInk: '0, 0, 0',
+  },
+  dark: {
+    labelColor: '#e8eaed', defaultEdgeColor: '#c4c7c5', nodeColor: '#292a2d',
+    nodeBorderColor: '#e8eaed', posColor: '#8ab4f8', negColor: '#f28b82',
+    activationInk: '232, 234, 237',
+  },
+};
+
+/** Points the canvases and the panel at the current theme's colours. */
+function applyTheme(sensors: SensorOverlay) {
+  const dark = isDark();
+  document.documentElement.classList.toggle('dark', dark);
+  const colors = VISUALIZER_COLORS[dark ? 'dark' : 'light'];
+  Object.assign(window, colors);
+  for (const picker of document.querySelectorAll<HTMLInputElement>('.neuro-color')) {
+    const target = picker.getAttribute('oninput')?.match(/'(\w+)'/)?.[1];
+    if (target && target in colors) picker.value = colors[target as keyof typeof colors];
+  }
+  sensors.refreshColors();
+  const label = dark ? 'Switch to light mode' : 'Switch to dark mode';
+  const button = document.querySelector<HTMLButtonElement>('#theme-toggle')!;
+  button.setAttribute('aria-label', label);
+  button.title = label;
+}
+
+/** The header's moon/sun button; the choice is remembered in this browser. */
+function bindTheme(sensors: SensorOverlay) {
+  document.querySelector('#theme-toggle')!.addEventListener('click', () => {
+    const theme = isDark() ? 'light' : 'dark';
+    document.documentElement.dataset['theme'] = theme;
+    try {
+      localStorage.setItem(THEME_KEY, theme);
+    } catch {
+      // Storage blocked (private window): the choice lasts until reload.
+    }
+    applyTheme(sensors);
+  });
+  prefersDark.addEventListener('change', () => applyTheme(sensors));
+  applyTheme(sensors);
 }
 
 /** The canvas is 150px tall until visualizer.js sizes it on its first frame. */
@@ -418,6 +471,7 @@ async function boot() {
   });
 
   const sensors = new SensorOverlay(document.querySelector<HTMLCanvasElement>('#sensors')!);
+  bindTheme(sensors);
   const stats = new Stats();
   const decision = new Decision();
   bindSensorToggle(sensors);

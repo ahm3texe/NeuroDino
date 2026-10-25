@@ -38,15 +38,25 @@ function sensorGeometry(watcher: ModelWatcher): {dino: Box, obstacles: Box[]} {
 }
 
 const FONT = "8px 'PressStart2P'";
-const NEAR = '#2563eb';
-const FAR = '#8aa8e8';
 
 export class SensorOverlay {
   enabled = true;
   private readonly ctx: CanvasRenderingContext2D;
+  private near = '';
+  private far = '';
+  private tagBackground = '';
 
   constructor(private readonly canvas: HTMLCanvasElement) {
     this.ctx = canvas.getContext('2d')!;
+    this.refreshColors();
+  }
+
+  /** Reads the theme's colours; call after switching light and dark mode. */
+  refreshColors() {
+    const style = getComputedStyle(document.documentElement);
+    this.near = style.getPropertyValue('--pos').trim();
+    this.far = style.getPropertyValue('--sensor-far').trim();
+    this.tagBackground = style.getPropertyValue('--tag-bg').trim();
   }
 
   draw(watcher: ModelWatcher, brain: Brain) {
@@ -92,15 +102,15 @@ export class SensorOverlay {
     const eyeY = d.y + d.h * 0.3;
     if (obstacles[0]) {
       const o1 = box(obstacles[0]);
-      ray(d.x + d.w, o1, eyeY, NEAR, `Obj1 Dist ${inputs[0]!.toFixed(2)}`);
+      ray(d.x + d.w, o1, eyeY, this.near, `Obj1 Dist ${inputs[0]!.toFixed(2)}`);
       if (obstacles[1]) {
         const o2 = box(obstacles[1]);
-        ray(o1.x + o1.w, o2, Math.min(eyeY, o2.y + o2.h / 2), FAR,
+        ray(o1.x + o1.w, o2, Math.min(eyeY, o2.y + o2.h / 2), this.far,
             `Obj2 Dist ${inputs[3]!.toFixed(2)}`);
       }
     }
     if (airborne) {
-      this.tag(`DinoY ${inputs[8]!.toFixed(2)}`, d.x + d.w / 2, d.y - 10 * dpr, NEAR, dpr);
+      this.tag(`DinoY ${inputs[8]!.toFixed(2)}`, d.x + d.w / 2, d.y - 10 * dpr, this.near, dpr);
     }
   }
 
@@ -112,7 +122,7 @@ export class SensorOverlay {
     const h = 14 * dpr;
     const left = Math.max(2 * dpr, Math.min(this.canvas.width - w - 2 * dpr, x - w / 2));
     const top = Math.max(2 * dpr, y - h / 2);
-    ctx.fillStyle = 'rgba(255,255,255,0.92)';
+    ctx.fillStyle = this.tagBackground;
     ctx.fillRect(left, top, w, h);
     ctx.strokeStyle = color;
     ctx.lineWidth = dpr;

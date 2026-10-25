@@ -36,6 +36,9 @@ function setupNeuroDino() {
     window.defaultEdgeColor = "rgb(80, 80, 80)";
     window.nodeColor = "white";
     window.nodeBorderColor = "#333333";
+    // Theme colours, set by main.ts for light and dark mode.
+    window.labelColor = "#535353";
+    window.activationInk = "0, 0, 0";  // r, g, b of the activation overlay
     window.edgeOpacity = 1.0;
     window.showActiveEdgesOnly = false;
 
@@ -709,7 +712,7 @@ function setupNeuroDino() {
         function drawLayerLabels(ctx, layerX_H, layerY_V, counts, logicalW, logicalH, contentHeight) {
             ctx.save();
             ctx.font = "9px 'PressStart2P'";
-            ctx.fillStyle = "#535353";
+            ctx.fillStyle = window.labelColor;
             // The pixel font has no ∈ℝ or superscripts: "HIDDEN · 48".
             const labels = ["INPUT", "HIDDEN", "OUTPUT"];
             const fV = window.smoothVerticalFactor;
@@ -836,7 +839,7 @@ function setupNeuroDino() {
                                             // If NodeColor is White, result is Grey.
                                             // Simply: If dist < actRadius, draw Darker.
                                             if (dist <= radius * val) {
-                                                ctx.fillStyle = `rgba(0,0,0,${val})`;
+                                                ctx.fillStyle = `rgba(${window.activationInk},${val})`;
                                                 // Note: rgba works with fillRect, it blends with canvas background (white? transparent?)
                                                 // But we are drawing pixel-by-pixel. Overlap?
                                                 // Actually, if we just set fillStyle to rgba(0,0,0,val) and draw rect
@@ -872,7 +875,7 @@ function setupNeuroDino() {
                                                 ctx.fillRect(px, py, pSize, pSize);
                                                 ctx.globalAlpha = 1.0;
                                             } else {
-                                                ctx.fillStyle = `rgba(0, 0, 0, ${absVal})`;
+                                                ctx.fillStyle = `rgba(${window.activationInk}, ${absVal})`;
                                                 ctx.fillRect(px, py, pSize, pSize);
                                             }
                                         }
@@ -910,7 +913,7 @@ function setupNeuroDino() {
                             ctx.globalAlpha = 1.0;
                         } else {
                             // Grayscale Mode (Math Fix Applied)
-                            ctx.fillStyle = `rgba(0,0,0,${Math.min(absVal, 1.0)})`;
+                            ctx.fillStyle = `rgba(${window.activationInk},${Math.min(absVal, 1.0)})`;
                             ctx.fill();
                         }
                     }
@@ -955,7 +958,7 @@ function setupNeuroDino() {
 
                     if (labels && labels[i]) {
                         ctx.save();
-                        ctx.fillStyle = "#535353";
+                        ctx.fillStyle = window.labelColor;
                         ctx.font = "10px 'PressStart2P'";
 
                         const fV = window.smoothVerticalFactor;
@@ -1011,7 +1014,7 @@ function setupNeuroDino() {
         for (let i = 0; i < oCount; i++) {
             const pos = getPos(2, i, oCount, effSpacingOutput);
             ctx.save();
-            ctx.fillStyle = "#535353";
+            ctx.fillStyle = window.labelColor;
             ctx.font = "10px 'PressStart2P'";
 
             const fV = window.smoothVerticalFactor;

@@ -15,9 +15,58 @@
   --jump: #e07b00;
   --duck: #7c5cbf;
   --run: #2f8f5b;
+  --soft: #b9b9b9;
+  --text-soft: #6f6f6f;
+  --sensor-far: #8aa8e8;
+  --tag-bg: rgba(255, 255, 255, 0.92);
+  --game-filter: none;
   --topbar-height: 82px;
   --pixel: 'PressStart2P', ui-monospace, monospace;
   color-scheme: light;
+}
+
+/* Dark mode: Chrome's dark greys. Follows the system unless the header's
+   theme button has picked one (data-theme on <html>). */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg: #202124;
+    --surface: #292a2d;
+    --ink: #e8eaed;
+    --muted: #9aa0a6;
+    --faint: #3c4043;
+    --shadow: 4px 4px 0 #17181a;
+    --pos: #8ab4f8;
+    --neg: #f28b82;
+    --jump: #fcad5a;
+    --duck: #c58af9;
+    --run: #81c995;
+    --soft: #5f6368;
+    --text-soft: #bdc1c6;
+    --sensor-far: #5b7fc0;
+    --tag-bg: rgba(41, 42, 45, 0.92);
+    --game-filter: invert(0.88);
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme='dark'] {
+  --bg: #202124;
+  --surface: #292a2d;
+  --ink: #e8eaed;
+  --muted: #9aa0a6;
+  --faint: #3c4043;
+  --shadow: 4px 4px 0 #17181a;
+  --pos: #8ab4f8;
+  --neg: #f28b82;
+  --jump: #fcad5a;
+  --duck: #c58af9;
+  --run: #81c995;
+  --soft: #5f6368;
+  --text-soft: #bdc1c6;
+  --sensor-far: #5b7fc0;
+  --tag-bg: rgba(41, 42, 45, 0.92);
+  --game-filter: invert(0.88);
+  color-scheme: dark;
 }
 
 * {
@@ -68,7 +117,7 @@ a {
   color: inherit;
 }
 
-/* GitHub mark, framed like the badges beside it. */
+/* The GitHub mark and the theme button, framed like the badges beside them. */
 .icon-link {
   display: inline-flex;
   flex: none;
@@ -76,8 +125,21 @@ a {
   justify-content: center;
   width: 36px;
   height: 36px;
+  padding: 0;
   border: 2px solid var(--ink);
   background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+/* The theme button shows the mode it switches to. */
+.icon-link .icon-sun,
+.dark .icon-link .icon-moon {
+  display: none;
+}
+
+.dark .icon-link .icon-sun {
+  display: block;
 }
 
 .icon-link:hover,
@@ -126,6 +188,7 @@ a {
   width: 44px;
   height: 47px;
   image-rendering: pixelated;
+  filter: var(--game-filter);
 }
 
 .brand h1 {
@@ -294,12 +357,15 @@ a {
   position: relative;
 }
 
+/* The game draws its own light colours; dark mode inverts them, as Chrome
+   does with its own dark theme. */
 #game {
   display: block;
   width: 100%;
   aspect-ratio: 4 / 1;
   background: var(--bg);
   image-rendering: pixelated;
+  filter: var(--game-filter);
 }
 
 #sensors {
@@ -654,7 +720,7 @@ a {
 }
 
 .key-avg {
-  background: #b9b9b9;
+  background: var(--soft);
 }
 
 .chart {
@@ -685,7 +751,7 @@ a {
 }
 
 .chart .avg {
-  stroke: #b9b9b9;
+  stroke: var(--soft);
   stroke-width: 1.5;
 }
 
@@ -762,7 +828,7 @@ a {
 
 .about p {
   margin: 10px 0 0;
-  color: #6f6f6f;
+  color: var(--text-soft);
   font-size: 9px;
   line-height: 2;
 }
