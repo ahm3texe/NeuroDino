@@ -61,7 +61,9 @@ falls with the generation and the best score.
 ## Results
 
 The model in this repository came from a single 6.5-hour run of 83
-generations. Its record, 547,287 points, was set in generation 77.
+generations. Its record, 547,287 points, was set in generation 77. It is also
+on Hugging Face as safetensors, with a model card:
+[huggingface.co/ahm3texe/neurodino](https://huggingface.co/ahm3texe/neurodino).
 
 Played on fresh games with the website's engine:
 

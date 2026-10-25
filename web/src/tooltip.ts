@@ -8,10 +8,10 @@ import {ACTIONS} from './panels.js';
 
 const INPUTS = [
   {name: 'Obj1 Dist', about: 'How close the next obstacle is (1 = about to hit)'},
-  {name: 'Obj1 Act', about: '1 if the next obstacle is a high bird to duck under'},
+  {name: 'Obj1 Act', about: '1 if the next obstacle is the highest bird, which flies over a running dino'},
   {name: 'Obj1 W', about: 'Width of the next obstacle'},
   {name: 'Obj2 Dist', about: 'How close the obstacle after it is'},
-  {name: 'Obj2 Act', about: '1 if that one is a high bird'},
+  {name: 'Obj2 Act', about: '1 if that one is the highest bird'},
   {name: 'Obj2 W', about: 'Width of the obstacle after it'},
   {name: 'Speed', about: 'Game speed (1 = top speed)'},
   {name: 'Gap', about: 'How close the two obstacles are to each other'},

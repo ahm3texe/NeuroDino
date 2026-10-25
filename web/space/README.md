@@ -7,6 +7,8 @@ sdk: static
 app_file: index.html
 pinned: false
 license: mit
+models:
+  - ahm3texe/neurodino
 short_description: An evolved neural network plays Chrome Dino, live
 ---
 
