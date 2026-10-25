@@ -106,21 +106,21 @@ function parseLog(csv: string): Generation[] {
 }
 
 /**
- * Best and average score of every generation, on a log scale: the scores
- * run from tens to hundreds of thousands.
+ * Record, best and average score of every generation, on a log scale: the
+ * scores run from tens to hundreds of thousands. Pointing at the chart (or
+ * touching it) reads out that generation below it; otherwise it shows the
+ * generation that set the record, whose best network plays on the page.
  */
 export function drawTrainingChart() {
   const log = parseLog(trainingLog);
   const last = log[log.length - 1]!;
-  // The generation whose best individual set the record: the one the page plays.
   const record = log.find(g => g.best === last.bestSoFar)!;
   setText(byId('train-generations'), String(last.generation));
-  setText(byId('train-best'), numberFormat.format(last.bestSoFar));
 
   const width = 300;
   const height = 130;
   const left = 34;
-  const right = 6;
+  const right = 8;
   const top = 8;
   const bottom = 18;
   const [lo, hi] = [1, 6];  // 10 .. 1,000,000
@@ -135,16 +135,56 @@ export function drawTrainingChart() {
     return `<line x1="${left}" x2="${width - right}" y1="${y(10 ** p)}" y2="${y(10 ** p)}" class="grid"/>` +
         `<text x="${left - 5}" y="${y(10 ** p) + 3}" text-anchor="end">${label}</text>`;
   }).join('');
+  const ticks = [1, 20, 40, 60, last.generation]
+      .map(g => `<text x="${x(g)}" y="${height - 4}" text-anchor="middle">${g}</text>`).join('');
 
-  byId('training-chart').innerHTML = `
+  const chart = byId('training-chart');
+  chart.innerHTML = `
     <svg viewBox="0 0 ${width} ${height}" role="img"
-         aria-label="Best and average score per generation, generations 1 to ${last.generation}">
-      ${grid}
+         aria-label="Record, best and average score per generation, generations 1 to ${last.generation}">
+      ${grid}${ticks}
       <polyline points="${line(g => g.average)}" class="avg"/>
       <polyline points="${line(g => g.best)}" class="best"/>
       <polyline points="${line(g => g.bestSoFar)}" class="record"/>
-      <circle cx="${x(record.generation)}" cy="${y(record.best)}" r="3" class="dot"/>
-      <text x="${left}" y="${height - 4}">1</text>
-      <text x="${width - right}" y="${height - 4}" text-anchor="end">gen ${last.generation}</text>
+      <line class="cursor" y1="${top}" y2="${height - bottom}"/>
+      <circle r="2.5" class="cursor-dot avg"/>
+      <circle r="2.5" class="cursor-dot best"/>
+      <circle r="3" class="cursor-dot record"/>
     </svg>`;
+
+  const svg = chart.querySelector('svg')!;
+  const cursor = svg.querySelector('.cursor')!;
+  const dots = {
+    average: svg.querySelector('.cursor-dot.avg')!,
+    best: svg.querySelector('.cursor-dot.best')!,
+    bestSoFar: svg.querySelector('.cursor-dot.record')!,
+  };
+  const readout = [...byId('chart-readout').querySelectorAll<HTMLElement>('dd')];
+
+  const show = (g: Generation) => {
+    const cx = x(g.generation).toFixed(1);
+    cursor.setAttribute('x1', cx);
+    cursor.setAttribute('x2', cx);
+    for (const [key, dot] of Object.entries(dots)) {
+      dot.setAttribute('cx', cx);
+      dot.setAttribute('cy', y(g[key as keyof Generation]).toFixed(1));
+    }
+    for (const dd of readout) {
+      const key = dd.dataset['key'] as keyof Generation;
+      setText(dd, key === 'generation' ? String(g.generation) : numberFormat.format(g[key]));
+    }
+  };
+  const at = (e: PointerEvent) => {
+    const rect = svg.getBoundingClientRect();
+    const vx = (e.clientX - rect.left) / rect.width * width;
+    const gen = Math.round((vx - left) / (width - left - right) * (last.generation - 1)) + 1;
+    return log[Math.min(log.length, Math.max(1, gen)) - 1]!;
+  };
+  svg.addEventListener('pointermove', e => show(at(e)));
+  svg.addEventListener('pointerdown', e => show(at(e)));
+  // A mouse that leaves goes back to the record; a finger's last pick stays.
+  svg.addEventListener('pointerleave', e => {
+    if (e.pointerType === 'mouse') show(record);
+  });
+  show(record);
 }

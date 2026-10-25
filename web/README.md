@@ -112,8 +112,8 @@ and copy its training log, for the Training card:
 cp training_log.csv web/src/assets/training-log.csv
 ```
 
-The record generation in the Training card's text and in "How it works" is
-written in `index.html`; update it too.
+The record generation in "How it works" and the run time in the Training card
+are written in `index.html`; update them too.
 
 ## Credits
 

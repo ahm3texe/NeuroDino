@@ -326,18 +326,18 @@
           <dl class="kpis">
             <div><dt>Generations</dt><dd id="train-generations">83</dd></div>
             <div><dt>Population</dt><dd>50</dd></div>
-            <div><dt>Best score</dt><dd id="train-best">547,287</dd></div>
+            <div><dt>Run time</dt><dd>6.5 h</dd></div>
           </dl>
           <div class="chart-head">
             <span>Score per generation (log)</span>
-            <span class="chart-legend">
-              <span><i class="key-record"></i>Record</span>
-              <span><i class="key-best"></i>Best</span>
-              <span><i class="key-avg"></i>Average</span>
-            </span>
           </div>
           <div class="chart" id="training-chart"></div>
-          <p class="card-sub">Elitism (best 2), tournament selection, uniform crossover and a mutation that shrinks as the scores grow. The page plays the record holder from generation 77.</p>
+          <dl class="chart-readout" id="chart-readout">
+            <div><dt>Generation</dt><dd data-key="generation"></dd></div>
+            <div><dt><i class="key-record"></i>Record</dt><dd data-key="bestSoFar"></dd></div>
+            <div><dt><i class="key-best"></i>Best</dt><dd data-key="best"></dd></div>
+            <div><dt><i class="key-avg"></i>Average</dt><dd data-key="average"></dd></div>
+          </dl>
         </section>
 
       </div>

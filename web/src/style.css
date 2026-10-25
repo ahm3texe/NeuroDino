@@ -658,14 +658,12 @@ a {
   font-size: 8px;
 }
 
-.strip-legend,
-.chart-legend {
+.strip-legend {
   display: flex;
   gap: 10px;
 }
 
-.strip-legend span,
-.chart-legend span {
+.strip-legend span {
   display: flex;
   align-items: center;
   gap: 4px;
@@ -707,11 +705,6 @@ a {
   white-space: nowrap;
 }
 
-.chart-legend i {
-  width: 12px;
-  height: 3px;
-}
-
 .key-record {
   background: var(--ink);
 }
@@ -728,11 +721,14 @@ a {
   margin-top: 8px;
 }
 
+/* Pointing at the chart reads out a generation; vertical swipes still scroll. */
 .chart svg {
   display: block;
   width: 100%;
   height: auto;
   overflow: visible;
+  cursor: crosshair;
+  touch-action: pan-y;
 }
 
 .chart text {
@@ -766,10 +762,44 @@ a {
   stroke-width: 2;
 }
 
-.chart .dot {
+.chart .cursor {
+  stroke: var(--muted);
+  stroke-dasharray: 2 2;
+}
+
+.chart .cursor-dot {
   fill: var(--surface);
-  stroke: var(--ink);
-  stroke-width: 2;
+}
+
+/* The generation under the pointer, or the record's; doubles as the legend. */
+.chart-readout {
+  display: grid;
+  grid-template-columns: 0.8fr repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 2px dashed var(--faint);
+}
+
+.chart-readout dt {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 8px;
+  text-transform: uppercase;
+}
+
+.chart-readout dt i {
+  flex: none;
+  width: 12px;
+  height: 3px;
+}
+
+.chart-readout dd {
+  margin-top: 6px;
+  font-size: 11px;
+  white-space: nowrap;
 }
 
 /* Model */
@@ -882,5 +912,9 @@ a {
 
   .kpis dd {
     font-size: 10px;
+  }
+
+  .chart-readout {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
