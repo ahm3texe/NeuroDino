@@ -95,7 +95,8 @@ npm run dev
 
 The link preview image, `public/og-image.png`, is drawn by
 `scripts/og_image.py` from the sprite sheet, the font and the model; the page's
-Open Graph tags and the Space's `thumbnail` point to it.
+Open Graph tags and the Space's `thumbnail` point to its copy on GitHub, which
+is served without the redirect the Space's file store adds.
 
 The site is live at https://huggingface.co/spaces/ahm3texe/neurodino. The
 workflow uploads with Hugging Face Trusted Publishers: the Space's settings
