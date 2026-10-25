@@ -213,9 +213,33 @@ const VISUALIZER_COLORS = {
   },
 };
 
+// Kept in step with the theme, for the per-frame game filter.
+let darkMode = false;
+// How far dark mode inverts the game: #f7f7f7 becomes about the cards' grey.
+const DARK_GAME_INVERT = 0.88;
+
+/**
+ * In dark mode the game is shown inverted, but the game also inverts itself
+ * for its night mode (every 700 points, for 12 s), which would flip it back to
+ * light. Both are the same per-pixel blend (CSS invert), so pick the amount
+ * that keeps the result at DARK_GAME_INVERT: for the game's own amount a,
+ * a + b(1 - 2a) = DARK_GAME_INVERT. Read from the watcher's private method on
+ * purpose: watcher.ts is part of the checkpoint fingerprint.
+ */
+function updateGameFilter(watcher: ModelWatcher) {
+  let filter = '';
+  if (darkMode) {
+    const a = (watcher as unknown as {getInvertFadeFactor(): number}).getInvertFadeFactor();
+    const b = Math.abs(1 - 2 * a) < 1e-3 ? 0.5 : (DARK_GAME_INVERT - a) / (1 - 2 * a);
+    filter = `invert(${Math.min(1, Math.max(0, b)).toFixed(3)})`;
+  }
+  if (gameCanvas.style.filter !== filter) gameCanvas.style.filter = filter;
+}
+
 /** Points the canvases and the panel at the current theme's colours. */
 function applyTheme(sensors: SensorOverlay) {
   const dark = isDark();
+  darkMode = dark;
   document.documentElement.classList.toggle('dark', dark);
   const colors = VISUALIZER_COLORS[dark ? 'dark' : 'light'];
   Object.assign(window, colors);
@@ -514,6 +538,7 @@ async function boot() {
       outputs: brain.lastOutputs,
     });
     tooltip.update();
+    updateGameFilter(watcher);
     sensors.draw(watcher, brain);
     decision.update(brain.lastOutputs, watcher.frame);
     if (statsFrame++ % 6 === 0) stats.update(watcher);

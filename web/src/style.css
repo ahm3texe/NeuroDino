@@ -358,7 +358,8 @@ a {
 }
 
 /* The game draws its own light colours; dark mode inverts them, as Chrome
-   does with its own dark theme. */
+   does with its own dark theme. main.ts adjusts the amount while the game is
+   in its own night mode, so it stays dark. */
 #game {
   display: block;
   width: 100%;
