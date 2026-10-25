@@ -48,13 +48,22 @@ jobs:
 
       - run: npm ci
 
+      # The committed checkpoint decides which timeline is shown; the live one
+      # only carries it forward. Committing a fresh checkpoint (a new epoch and
+      # seed) therefore restarts the shared game.
       - name: Continue from the live checkpoint
         run: |
           url="https://huggingface.co/spaces/$SPACE/resolve/main/checkpoint.json"
-          if curl -fsSL "$url" -o live.json && node -e "JSON.parse(require('fs').readFileSync('live.json', 'utf8'))"; then
+          if curl -fsSL "$url" -o live.json && node -e '
+            const fs = require("fs");
+            const live = JSON.parse(fs.readFileSync("live.json", "utf8"));
+            const ours = JSON.parse(fs.readFileSync("src/timeline/checkpoint.json", "utf8"));
+            const same = ["fingerprint", "epoch", "seed"].every(k => live[k] === ours[k]);
+            process.exit(same && live.frame >= ours.frame ? 0 : 1);
+          '; then
             mv live.json src/timeline/checkpoint.json
           else
-            echo "No live checkpoint; continuing from the committed one."
+            echo "Continuing from the committed checkpoint."
           fi
 
       - run: npm run build
