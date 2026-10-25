@@ -105,8 +105,8 @@ and copy its training log, for the Training card:
 cp training_log.csv web/src/assets/training-log.csv
 ```
 
-The "Gen 77" badge and the record generation in the Training card's text are
-written in `index.html`; update them too.
+The record generation in the Training card's text and in "How it works" is
+written in `index.html`; update it too.
 
 ## Credits
 

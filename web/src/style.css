@@ -71,10 +71,11 @@ a {
 /* GitHub mark, framed like the badges beside it. */
 .icon-link {
   display: inline-flex;
+  flex: none;
   align-items: center;
   justify-content: center;
-  width: 35px;
-  height: 35px;
+  width: 36px;
+  height: 36px;
   border: 2px solid var(--ink);
   background: var(--surface);
 }
@@ -146,16 +147,17 @@ a {
   gap: 10px;
 }
 
-.topbar-badges .chip {
-  padding: 8px 12px;
-  font-size: 9px;
+/* Everything in the header row is the same height; the GitHub mark is square.
+   (A minimum, so the live badge can wrap to two lines on phones.) */
+.topbar-badges > * {
+  min-height: 36px;
 }
 
 .live-badge {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  padding: 8px 12px;
+  padding: 6px 12px;
   border: 2px solid var(--ink);
   background: var(--surface);
   font-size: 9px;
@@ -800,8 +802,9 @@ a {
     font-size: 16px;
   }
 
-  .live-badge {
-    white-space: normal;
+  /* Room for the GitHub mark and the badge on one line. */
+  .live-more {
+    display: none;
   }
 
   .stats > div {
