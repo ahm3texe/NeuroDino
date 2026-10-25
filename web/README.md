@@ -61,10 +61,11 @@ does in its own dark theme.
   last 75 frames' choices (`src/panels.ts`). Everything is drawn from the same
   frame as the game; the visualizer no longer eases between values, which the
   Space did because it only received a few updates a second.
-- **Model Information**: 12 → 48 (tanh) → 3 (softmax), 771 parameters.
+- **Model Information**: 12 → 56 (tanh) → 3 (softmax), 899 parameters.
 - **Training**: best and average score of each generation of the first run,
   from `src/assets/training-log.csv` (a copy of `training_log.csv`), on a log
-  scale. The page plays the model from the second run, v2.
+  scale. The page plays v3, made from the second run's model (see
+  `training/README.md`).
 
 On screens 1200px and wider the game and the cards sit next to the network,
 which fills the viewport's height and stays in view, so the dino and the

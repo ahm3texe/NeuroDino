@@ -19,8 +19,9 @@ env/
 node_modules/
 dist/
 
-# Built from evaluation/evaluate.ts
+# Built from evaluation/evaluate.ts and training/*.ts
 evaluation/evaluate.mjs
+training/*.mjs
 
 # main_train.py's default output
 runs/train/
@@ -38,8 +39,12 @@ runs/dino-train-*/
 # Google Sans is not openly licensed and nothing uses it
 neurodino/assets/fonts/Google-Sans-Text-Regular.ttf
 
-# Built from evaluation/evaluate.ts
+# Built from evaluation/evaluate.ts and training/*.ts
 evaluation/evaluate.mjs
+training/*.mjs
 
 # main_train.py's default output
 runs/train/
+
+# v3 experiments: mined moments, labels, candidate models (regenerable, large)
+runs/v3-work/

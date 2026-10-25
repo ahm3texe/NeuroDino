@@ -17,7 +17,8 @@ let it decide first, on the previous frame's positions, and never turned on
 night mode. v1 learned its timing in that loop, and that one frame changes
 what it does: on the website it crashed before top speed in more than half of
 its games. `ORDER=training` plays the v1 training loop. v2 was trained in the
-website's loop (`main_train.py`, `neurodino/episode.py`).
+website's loop (`main_train.py`, `neurodino/episode.py`), and v3 from v2 (see
+[`training/`](../training/README.md)).
 
 ## Data
 
@@ -30,10 +31,16 @@ website's loop (`main_train.py`, `neurodino/episode.py`).
 | `v2-validation.jsonl` | v2 | website | normal | 1001–1100 | 4 h |
 | `v2-test.jsonl` | v2 | website | normal | 1–200 | 4 h |
 | `v2-test-doubled-gaps.jsonl` | v2 | website | doubled | 1–200 | 30 min |
+| `v2-fresh.jsonl` | v2 | website | normal | 900001–901000 | 4 h |
+| `v3-validation.jsonl` | v3 | website | normal | 300001–301000 | 4 h |
+| `v3-test.jsonl` | v3 | website | normal | 1–200 | 4 h |
+| `v3-fresh.jsonl` | v3 | website | normal | 900001–901000 | 4 h |
 
 Doubled gaps are Chrome's audio-cue mode, which `watch_model.py` and the
-Gradio app use by default. Seeds 1–200 were kept as the test set: v2 was
-chosen on validation games before it ever played them.
+Gradio app use by default. Seeds 1–200 were kept as the test set: v2 and v3
+were chosen on validation games before they ever played them. v3 was picked
+among a few candidates on the 1,000 validation games, so it was also played
+on 1,000 games none of them had seen, next to v2.
 
 ```bash
 python evaluation/summarize.py evaluation/data/*.jsonl
@@ -50,7 +57,7 @@ web/node_modules/.bin/esbuild evaluation/evaluate.ts --bundle --platform=node --
 node evaluation/evaluate.mjs v2-test.jsonl 200 864000 normal
 ```
 
-v1 is in `backups/brain_score_547287.pkl`:
+v1 is in `backups/brain_score_547287.pkl` and v2 in `runs/v2/best_brain.pkl`:
 
 ```bash
 python export_best_brain.py --input backups/brain_score_547287.pkl --output v1.json

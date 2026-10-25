@@ -307,14 +307,14 @@
         <section class="card side-card area-model" aria-labelledby="model-title">
           <div class="side-head">
             <h2 id="model-title">Model Information</h2>
-            <span class="side-meta">771 parameters</span>
+            <span class="side-meta">899 parameters</span>
           </div>
           <div class="chain">
-            <span class="chip">12 inputs</span>→<span class="chip">48 · tanh</span>→<span class="chip">3 · softmax</span>
+            <span class="chip">12 inputs</span>→<span class="chip">56 · tanh</span>→<span class="chip">3 · softmax</span>
           </div>
           <dl class="facts">
-            <div><dt>Weights</dt><dd>12×48 + 48×3</dd></div>
-            <div><dt>Biases</dt><dd>48 + 3</dd></div>
+            <div><dt>Weights</dt><dd>12×56 + 56×3</dd></div>
+            <div><dt>Biases</dt><dd>56 + 3</dd></div>
           </dl>
         </section>
 
@@ -347,11 +347,11 @@
         <div class="about-grid">
           <div>
             <h3>What it sees</h3>
-            <p>Every frame the network reads 12 numbers from the game: how close the next two obstacles are, how wide they are, whether each is the highest bird (one that flies over a running dino), the gap between them, the game speed, and the dino's own height, vertical speed and whether it is in the air or ducking. 48 hidden neurons (tanh) turn them into three probabilities, jump, duck and run, and the dino does the likeliest. Turn on Sensors to see the distances, and hover a neuron to see what it does.</p>
+            <p>Every frame the network reads 12 numbers from the game: how close the next two obstacles are, how wide they are, whether each is the highest bird (one that flies over a running dino), the gap between them, the game speed, and the dino's own height, vertical speed and whether it is in the air or ducking. 56 hidden neurons (tanh) turn them into three probabilities, jump, duck and run, and the dino does the likeliest. Turn on Sensors to see the distances, and hover a neuron to see what it does.</p>
           </div>
           <div>
             <h3>How it learned</h3>
-            <p>No examples and no backpropagation: a genetic algorithm. In each generation 50 networks played and their scores decided who had children: the best two carried over unchanged, parents were picked by tournament, and their weights were mixed at random and mutated. A first run of 83 generations reached a record of 547,287 points, but each generation played a single game, in a game loop that showed the network the obstacles a frame late; on this page that network crashed before top speed in more than half of its games. A second run started from it, in this page's loop, and scored every network on the same 10 games of up to an hour. Its best network is the one playing here: in 200 test games it reached top speed every time, and 190 of them lasted four hours.</p>
+            <p>Mostly a genetic algorithm, with no examples and no backpropagation: in each generation 50 networks played, and their scores decided who had children (the best two carried over, parents were picked by tournament, and their weights were mixed at random and mutated). A first run of 83 generations reached a record of 547,287 points, but each generation played one game, in a game loop that showed the network the obstacles a frame late; on this page that network crashed before top speed in more than half of its games. A second run, in this page's loop and with 10 games per generation, fixed that. Its network still crashed about once in a hundred hours at top speed, nearly always in the air when the next obstacle needed a jump: a duck in the air drops the dino fast and would have saved it, but the network never ducked. So 8 neurons that drive only duck were added and trained by gradient descent on the moments a search over the game found, leaving every jump as before. That network, v3, plays here: in 1,000 new four-hour games it crashed 3 times, against 40 before.</p>
           </div>
           <div>
             <h3>Why everyone sees the same game</h3>

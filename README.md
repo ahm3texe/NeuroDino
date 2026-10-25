@@ -14,9 +14,10 @@ with its network drawn next to it: **[huggingface.co/spaces/ahm3texe/neurodino](
 | `watch_model.py` | Plays a saved model in a window, or with `--silent` without one |
 | `export_best_brain.py` | Exports `best_brain.pkl` to the website's JSON format |
 | `app.py`, `neurodino/web-ui/` | The original Gradio dashboard |
-| `best_brain.pkl` | The model (v2) |
+| `best_brain.pkl` | The model (v3) |
 | `training_log.csv`, `runs/dino-full-train/`, `backups/` | The first training run: its log, its TensorBoard logs and every record-setting model; v1 is `backups/brain_score_547287.pkl` |
-| `runs/v2/` | The second run's log and validation |
+| `runs/v2/` | The second run's log, validation and model (v2) |
+| `training/` | How v3 was made from v2, see [`training/README.md`](training/README.md) |
 | `evaluation/` | How the models were tested, with every test game, see [`evaluation/README.md`](evaluation/README.md) |
 | `web/` | The website: the game, the model and the visualizer ported to TypeScript, see [`web/README.md`](web/README.md) |
 
@@ -32,7 +33,7 @@ python watch_model.py
 Training plays every network of a generation on the same few games, in
 parallel, and writes its log, the best network of each generation and the
 network that does best on separate validation games to `runs/train/`. v2
-came from:
+came from (v3 then came from v2, see [`training/`](training/README.md)):
 
 ```bash
 python main_train.py --start backups/brain_score_547287.pkl --generations 40 --games 10 --minutes 60 --mutation 0.02 --shock 0
@@ -51,15 +52,15 @@ npm run dev
 
 ## The network
 
-12 inputs → 48 hidden neurons (tanh) → 3 outputs (softmax: jump, duck, run),
-771 parameters. The inputs describe the next two obstacles (time to impact,
+12 inputs → 56 hidden neurons (tanh) → 3 outputs (softmax: jump, duck, run),
+899 parameters. The inputs describe the next two obstacles (time to impact,
 width, whether it is the highest bird), the game speed, the gap between the
 obstacles and the dino's own height, vertical speed and whether it is in the
 air or ducking.
 
-It was trained by a genetic algorithm, in two runs. Each generation has 50
-networks; the best two carry over unchanged, the rest are bred by tournament
-selection (3), uniform crossover and Gaussian mutation.
+Most of it was trained by a genetic algorithm, in two runs. Each generation
+has 50 networks; the best two carry over unchanged, the rest are bred by
+tournament selection (3), uniform crossover and Gaussian mutation.
 
 - **First run (v1):** 83 generations, 6.5 hours, from random weights. Each
   generation played a single game and a network's fitness was the distance
@@ -68,7 +69,12 @@ selection (3), uniform crossover and Gaussian mutation.
   played the same 10 games of up to an hour each generation, new games every
   generation, and its fitness was its mean score; mutation was gentler. The
   best network of each generation was then scored on 100 validation games, and
-  the best of those is v2.
+  the best of those is v2. v2 has 48 hidden neurons and never ducks.
+- **v3:** v2 plus 8 hidden neurons that drive only duck. v2 crashed about once
+  in a hundred hours at top speed, nearly always still in the air when the
+  next obstacle needed a jump; a duck in the air drops the dino fast and would
+  have saved it. Trying both choices in the game found when it saves, and the
+  new neurons learned that by gradient descent. Every jump is still v2's.
 
 The first run's runner let the networks decide before the obstacles moved
 each frame, so v1 learned to act on what it saw a frame earlier. The website,
@@ -78,20 +84,26 @@ second run.
 ## Results
 
 Each model played 200 fresh games (seeds 1–200) with the website's engine, up
-to four hours each; v2 had never played them before.
+to four hours each; v2 and v3 had never played them before.
 
 | | Ended before top speed | Lasted 4 hours | Crashes at top speed |
 | --- | --- | --- | --- |
 | v1, website loop | 113 | 85 | 1 every ~170 h |
 | v1, its training loop | 5 | 110 | 1 every ~7 h |
-| **v2, website loop** | **0** | **190** | 1 every ~80 h |
+| v2, website loop | 0 | 190 | 1 every ~80 h |
+| **v3, website loop** | **0** | **198** | 1 every ~390 h |
+
+On 1,000 more games that no model had played (seeds 900001–901000, four hours
+each), v2 crashed 40 times and v3 3 times: about once in 100 and once in 1,300
+hours at top speed.
 
 In the website's loop v1 jumps a frame early: at intermediate speeds it lands
 on obstacles, while at top speed that frame happens to help. v2 reaches top
 speed in every game, also with the doubled gaps of the Gradio app. Neither
-ever ducks: one input marks only the highest bird, which needs no action, so
+v1 nor v2 ever ducks: one input marks only the highest bird, which needs no action, so
 a bird to duck under looks the same as a low one to jump over, and both jump.
-The models are on Hugging Face as safetensors, with a model card:
+v3 ducks only in the air, to drop fast. The models are on Hugging Face as
+safetensors, with a model card:
 [huggingface.co/ahm3texe/neurodino](https://huggingface.co/ahm3texe/neurodino).
 Details and every game are in [`evaluation/`](evaluation/README.md).
 

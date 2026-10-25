@@ -439,7 +439,8 @@ def main():
             if isinstance(data, tuple):
                 brain, score = data
                 print(f"✅ Loaded brain from {args.brain}")
-                print(f"   Training score: {score:,}")
+                if score is not None:
+                    print(f"   Training score: {score:,}")
             else:
                 brain = data
                 print(f"✅ Loaded brain from {args.brain} (legacy format)")
