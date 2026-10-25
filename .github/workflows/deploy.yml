@@ -1,39 +1,40 @@
 name: Deploy
 
-# Every run moves the shared game forward to "now" and republishes the site
-# (web/) to GitHub Pages, so a new viewer only has to simulate the last few
-# minutes before joining in.
+# Every hour: move the shared game forward to "now", rebuild the site (web/)
+# and upload it to the Hugging Face Space, so a new viewer only has to
+# simulate the last hour before joining in.
 #
-# Off until the repository variable DEPLOY_PAGES is "true" (Settings → Secrets
-# and variables → Actions → Variables) and Pages uses "GitHub Actions" as its
-# source; until then every run is skipped instead of failing.
+# Uploads use Hugging Face Trusted Publishers: the Space's settings trust this
+# repository's main branch and this workflow file, and each run exchanges
+# GitHub's OIDC token for a one-hour token that can only write to the Space.
+# There is no HF_TOKEN secret.
 on:
   push:
     branches: [main]
   schedule:
-    - cron: '*/30 * * * *'
+    - cron: '7 * * * *'
   workflow_dispatch:
 
 permissions:
   contents: read
-  pages: write
   id-token: write
   actions: write
 
 concurrency:
-  group: pages
+  group: space
   cancel-in-progress: false
+
+env:
+  SPACE: ahm3texe/neurodino
+  HF_OIDC_RESOURCE: spaces/ahm3texe/neurodino
+  HF: uvx --from huggingface_hub>=1.19 hf
 
 jobs:
   deploy:
-    if: vars.DEPLOY_PAGES == 'true'
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: web
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
 
@@ -43,11 +44,13 @@ jobs:
           cache: npm
           cache-dependency-path: web/package-lock.json
 
+      - uses: astral-sh/setup-uv@v6
+
       - run: npm ci
 
       - name: Continue from the live checkpoint
         run: |
-          url="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/checkpoint.json"
+          url="https://huggingface.co/spaces/$SPACE/resolve/main/checkpoint.json"
           if curl -fsSL "$url" -o live.json && node -e "JSON.parse(require('fs').readFileSync('live.json', 'utf8'))"; then
             mv live.json src/timeline/checkpoint.json
           else
@@ -56,14 +59,26 @@ jobs:
 
       - run: npm run build
 
-      - uses: actions/configure-pages@v5
+      - name: Upload to the Space
+        run: |
+          cp space/README.md dist/README.md
+          # Each build names its bundle by content hash; drop the old ones.
+          $HF upload "$SPACE" dist . --repo-type space --delete "assets/*" \
+            --commit-message "Deploy ${GITHUB_SHA::7}"
 
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: web/dist
-
-      - id: deployment
-        uses: actions/deploy-pages@v4
+      # Every upload is a commit with a new bundle; squash the Space's history
+      # once a day so it stays far below the Hub's storage limit.
+      - name: Squash the Space's history
+        if: github.event_name == 'schedule'
+        continue-on-error: true
+        run: |
+          [ "$(date -u +%H)" = "03" ] || exit 0
+          export HF_TOKEN="$($HF auth token)"
+          uv run --with "huggingface_hub>=1.19" python -c '
+          from huggingface_hub import HfApi
+          HfApi().super_squash_history("ahm3texe/neurodino", repo_type="space",
+                                       commit_message="NeuroDino site")
+          '
 
       # GitHub pauses scheduled workflows after 60 days without commits.
       - name: Keep the schedule enabled

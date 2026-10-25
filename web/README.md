@@ -12,11 +12,13 @@ in sync, with nothing streamed: each browser computes it.
   bit-identical frames (checked on V8 and JavaScriptCore).
 - Frame N of the shared game belongs to wall-clock time `epoch + N / 60 s`.
 - `src/timeline/checkpoint.json` holds the full game state at a recent frame.
-  A viewer loads it, simulates the few minutes since then (well under a
-  second), and from there steps once per 1/60 s of real time.
-- `../.github/workflows/deploy.yml` runs every 30 minutes, once enabled: it downloads the live
-  checkpoint, advances it to the current time (`npm run checkpoint`) and
-  republishes the site, so checkpoints stay fresh.
+  A viewer loads it, simulates the time since then (under a second for an
+  hour), and from there steps once per 1/60 s of real time.
+- `../.github/workflows/deploy.yml` runs every hour: it downloads the live
+  checkpoint from the Hugging Face Space, advances it to the current time
+  (`npm run checkpoint`), rebuilds the site and uploads it to the Space with
+  `space/README.md` as its README, so checkpoints stay fresh. It squashes the
+  Space's history once a day, since every upload adds a new bundle.
 - If the model or engine sources change, the checkpoint's fingerprint no longer
   matches and a new shared game starts.
 
@@ -83,6 +85,11 @@ npm run dev
 ```
 
 `npm run build` advances the checkpoint and writes the static site to `dist/`.
+
+The site is live at https://huggingface.co/spaces/ahm3texe/neurodino. The
+workflow uploads with Hugging Face Trusted Publishers: the Space's settings
+trust this repository's `main` branch and `deploy.yml`, so no token is
+stored.
 
 ## Updating the model
 

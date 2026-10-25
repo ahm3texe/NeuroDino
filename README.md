@@ -2,7 +2,7 @@
 
 A neural network that learned to play Chrome's T-Rex game through a genetic
 algorithm, and a website where everyone watches it play the same game, live,
-with its network drawn next to it.
+with its network drawn next to it: **[huggingface.co/spaces/ahm3texe/neurodino](https://huggingface.co/spaces/ahm3texe/neurodino)**.
 
 ## Repository
 
