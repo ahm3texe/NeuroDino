@@ -1,10 +1,12 @@
 # Paper
 
-`neurodino.tex` is the paper (in Turkish): how the network was trained, how
-the run went and what the trained model does on 200 fresh games, with an
-input ablation; then how v2 and v3 fixed what that showed. `neurodino.pdf` is
-the compiled paper. It compiles with pdfLaTeX, XeLaTeX or Tectonic
-(`tectonic paper/neurodino.tex`); the figures are in `figures/`.
+The paper: how the network was trained, how the run went and what the
+trained model does on 200 fresh games, with an input ablation; then how v2
+and v3 fixed what that showed. It was written in Turkish (`neurodino.tex`,
+`neurodino.pdf`); `neurodino-en.tex` and `neurodino-en.pdf` are its English
+translation, sentence for sentence, with the same tables and numbers. Both
+compile with pdfLaTeX, XeLaTeX or Tectonic (`tectonic paper/neurodino-en.tex`);
+the figures are in `figures/`, the English copies ending in `-en`.
 
 ## Reproducing the numbers
 
@@ -22,6 +24,9 @@ and how the engine was checked against Python.
 python paper/scripts/training_figures.py
 python paper/scripts/evaluation_figure.py
 ```
+
+`--en` draws the English copies (`training-en.pdf`, `weights-en.pdf`,
+`evaluation-en.pdf`).
 
 They need `numpy` and `matplotlib`. `figures/website.png` is a screenshot of
 the live site.
