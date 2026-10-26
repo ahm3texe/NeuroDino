@@ -41,7 +41,13 @@ python training/learn.py v2.json --ground normal --air games moments --out v3.js
 
 Each script also splits into parts by seed range (or part and parts for
 `labels.mjs moments` and `hard.mjs`) to run in parallel; the result is the
-same. With these defaults `learn.py` reproduces v3 exactly.
+same. With these defaults `learn.py` reproduces v3 exactly: run again from
+v2, the whole pipeline gave the same data and a bit-identical v3.
+
+On an Apple M4 (10 cores), with each step split into 10 parallel processes,
+it takes about 37 minutes: `mine` 31 minutes, `sample` 13 seconds, `labels`
+3 minutes and `learn.py` 2 minutes. Validating a candidate on 1,000
+four-hour games (`evaluation/evaluate.ts`) takes 8 more minutes.
 
 On the saved moments, v3 survives 406 of the 500 crash moments it trained on
 and 103 of the 124 held out (v2: none), and all 4,000 tight moments. What

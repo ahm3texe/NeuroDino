@@ -19,6 +19,7 @@ with its network drawn next to it: **[huggingface.co/spaces/ahm3texe/neurodino](
 | `runs/v2/` | The second run's log, validation and model (v2) |
 | `training/` | How v3 was made from v2, see [`training/README.md`](training/README.md) |
 | `evaluation/` | How the models were tested, with every test game, see [`evaluation/README.md`](evaluation/README.md) |
+| `paper/` | The paper, in Turkish: [`paper/neurodino.pdf`](paper/neurodino.pdf), its LaTeX source, figures and the scripts that draw them |
 | `web/` | The website: the game, the model and the visualizer ported to TypeScript, see [`web/README.md`](web/README.md) |
 
 ## Run
@@ -105,7 +106,9 @@ a bird to duck under looks the same as a low one to jump over, and both jump.
 v3 ducks only in the air, to drop fast. The models are on Hugging Face as
 safetensors, with a model card:
 [huggingface.co/ahm3texe/neurodino](https://huggingface.co/ahm3texe/neurodino).
-Details and every game are in [`evaluation/`](evaluation/README.md).
+Details and every game are in [`evaluation/`](evaluation/README.md). The paper (in Turkish,
+[`paper/neurodino.pdf`](paper/neurodino.pdf)) describes all three models and
+how they were tested.
 
 ## Credits and license
 
