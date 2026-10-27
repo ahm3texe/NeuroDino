@@ -1,0 +1,23 @@
+cff-version: 1.2.0
+message: "If you use NeuroDino, please cite the paper."
+title: "NeuroDino"
+authors:
+  - family-names: "Yıldırım"
+    given-names: "Ahmet Şafak"
+repository-code: "https://github.com/ahm3texe/NeuroDino"
+url: "https://huggingface.co/spaces/ahm3texe/neurodino"
+license: MIT
+keywords:
+  - neuroevolution
+  - genetic algorithms
+  - neural networks
+  - Chrome T-Rex
+preferred-citation:
+  type: report
+  title: "NeuroDino: Neuroevolutionary Training, Behavior Analysis and Improvement of a Small Neural Network Playing the Chrome T-Rex Game"
+  authors:
+    - family-names: "Yıldırım"
+      given-names: "Ahmet Şafak"
+  year: 2026
+  month: 10
+  url: "https://github.com/ahm3texe/NeuroDino/blob/main/paper/neurodino-en.pdf"

@@ -1,5 +1,10 @@
 # NeuroDino
 
+[![Paper: English](https://img.shields.io/badge/Paper-English%20PDF-b31b1b)](paper/neurodino-en.pdf)
+[![Makale: Türkçe](https://img.shields.io/badge/Makale-T%C3%BCrk%C3%A7e%20PDF-b31b1b)](paper/neurodino.pdf)
+[![Live demo](https://img.shields.io/badge/Live%20demo-Hugging%20Face%20Space-ffcc4d)](https://huggingface.co/spaces/ahm3texe/neurodino)
+[![Model](https://img.shields.io/badge/Model-Hugging%20Face-ffcc4d)](https://huggingface.co/ahm3texe/neurodino)
+
 A neural network that learned to play Chrome's T-Rex game through a genetic
 algorithm, and a website where everyone watches it play the same game, live,
 with its network drawn next to it: **[huggingface.co/spaces/ahm3texe/neurodino](https://huggingface.co/spaces/ahm3texe/neurodino)**.
