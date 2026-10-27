@@ -84,7 +84,7 @@ Changes to the Space's `visualizer.js`:
 - nothing animates on load, and values are not eased between frames;
 - the canvas is as tall as its content (the vertical layout keeps room for its
   rotated labels) and is only reallocated when its size changes;
-- labels use the pixel font; layer names read "HIDDEN · 48", as the font has
+- labels use the pixel font; layer names read "HIDDEN · 56", as the font has
   no ∈ℝ or superscripts.
 
 ## Run
