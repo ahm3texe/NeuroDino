@@ -351,7 +351,7 @@
           </div>
           <div>
             <h3>How it learned</h3>
-            <p>Mostly a genetic algorithm, with no examples and no backpropagation: in each generation 50 networks played, and their scores decided who had children (the best two carried over, parents were picked by tournament, and their weights were mixed at random and mutated). A first run of 83 generations reached a record of 547,287 points, but each generation played one game, in a game loop that showed the network the obstacles a frame late; on this page that network crashed before top speed in more than half of its games. A second run, in this page's loop and with 10 games per generation, fixed that. Its network still crashed about once in a hundred hours at top speed, nearly always in the air when the next obstacle needed a jump: a duck in the air drops the dino fast and would have saved it, but the network never ducked. So 8 neurons that drive only duck were added and trained by gradient descent on the moments a search over the game found, leaving every jump as before. That network, v3, plays here: in 1,000 new four-hour games it crashed 3 times, against 40 before.</p>
+            <p>Mostly a genetic algorithm, with no examples and no backpropagation: in each generation 50 networks played, and their scores decided who had children (the best two carried over, parents were picked by tournament, and their weights were mixed at random and mutated). A first run of 83 generations reached a record of 547,287 points, but each generation played one game, in a game loop that showed the network the obstacles a frame late; on this page that network crashed before top speed in more than half of its games. A second run, in this page's loop and with 10 games per generation, fixed that. Its network still crashed about once in a hundred hours at top speed, nearly always in the air when the next obstacle needed a jump: a duck in the air drops the dino fast and would have saved it, but the network never ducked. So 8 neurons that drive only duck were added and trained by gradient descent on the moments a search over the game found, leaving every jump as before. That network, v3, plays here: in 1,000 new four-hour games it crashed 3 times, against 40 before. The <a href="https://github.com/ahm3texe/NeuroDino/blob/main/paper/neurodino-en.pdf">paper</a> tells the whole story.</p>
           </div>
           <div>
             <h3>Why everyone sees the same game</h3>
@@ -363,7 +363,7 @@
 
     <footer class="footer">
       <p>The game (engine, sprites and rules) is ported from Chromium's T-Rex runner, <a href="https://source.chromium.org/chromium/chromium/src/+/main:components/neterror/resources/dino_game/">components/neterror/resources/dino_game</a>. © The Chromium Authors, <a href="LICENSE-chromium.txt">BSD-3-Clause</a>. Not affiliated with Google.</p>
-      <p>NeuroDino by <a href="https://github.com/ahm3texe">ahm3texe</a> · <a href="https://github.com/ahm3texe/neurodino">Source</a></p>
+      <p>NeuroDino by <a href="https://github.com/ahm3texe">ahm3texe</a> · <a href="https://github.com/ahm3texe/neurodino">Source</a> · <a href="https://github.com/ahm3texe/NeuroDino/blob/main/paper/neurodino-en.pdf">Paper</a> (<a href="https://github.com/ahm3texe/NeuroDino/blob/main/paper/neurodino.pdf" hreflang="tr">Türkçe</a>) · <a href="https://huggingface.co/ahm3texe/neurodino">Model</a></p>
     </footer>
 
     <script type="module" src="/src/main.ts"></script>

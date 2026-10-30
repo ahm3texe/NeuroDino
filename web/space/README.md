@@ -17,6 +17,8 @@ short_description: An evolved neural network plays Chrome Dino, live
 A neural network trained by a genetic algorithm plays Chrome's T-Rex game.
 Everyone who opens the page watches the same game at the same moment, with the
 network's inputs, hidden activations and decisions drawn next to it.
+How the network was trained and tested is in the paper:
+[English](https://github.com/ahm3texe/NeuroDino/blob/main/paper/neurodino-en.pdf) ([Türkçe](https://github.com/ahm3texe/NeuroDino/blob/main/paper/neurodino.pdf)).
 
 ## How it works
 
