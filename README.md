@@ -1,7 +1,7 @@
 # NeuroDino
 
-[![Paper: English](https://img.shields.io/badge/Paper-English%20PDF-b31b1b)](paper/neurodino-en.pdf)
-[![Makale: Türkçe](https://img.shields.io/badge/Makale-T%C3%BCrk%C3%A7e%20PDF-b31b1b)](paper/neurodino.pdf)
+[![Paper: English](https://img.shields.io/badge/Paper-English%20PDF-b31b1b)](https://ahm3texe-neurodino.static.hf.space/paper/neurodino-en.pdf)
+[![Makale: Türkçe](https://img.shields.io/badge/Makale-T%C3%BCrk%C3%A7e%20PDF-b31b1b)](https://ahm3texe-neurodino.static.hf.space/paper/neurodino.pdf)
 [![Live demo](https://img.shields.io/badge/Live%20demo-Hugging%20Face%20Space-ffcc4d)](https://huggingface.co/spaces/ahm3texe/neurodino)
 [![Model](https://img.shields.io/badge/Model-Hugging%20Face-ffcc4d)](https://huggingface.co/ahm3texe/neurodino)
 
@@ -24,7 +24,7 @@ with its network drawn next to it: **[huggingface.co/spaces/ahm3texe/neurodino](
 | `runs/v2/` | The second run's log, validation and model (v2) |
 | `training/` | How v3 was made from v2, see [`training/README.md`](training/README.md) |
 | `evaluation/` | How the models were tested, with every test game, see [`evaluation/README.md`](evaluation/README.md) |
-| `paper/` | The paper: [`paper/neurodino-en.pdf`](paper/neurodino-en.pdf) in English, translated from the Turkish original [`paper/neurodino.pdf`](paper/neurodino.pdf); their LaTeX sources, figures and the scripts that draw them |
+| `paper/` | The paper: [`paper/neurodino-en.pdf`](https://ahm3texe-neurodino.static.hf.space/paper/neurodino-en.pdf) in English, translated from the Turkish original [`paper/neurodino.pdf`](https://ahm3texe-neurodino.static.hf.space/paper/neurodino.pdf); their LaTeX sources, figures and the scripts that draw them |
 | `web/` | The website: the game, the model and the visualizer ported to TypeScript, see [`web/README.md`](web/README.md) |
 
 ## Run
@@ -112,8 +112,8 @@ v3 ducks only in the air, to drop fast. The models are on Hugging Face as
 safetensors, with a model card:
 [huggingface.co/ahm3texe/neurodino](https://huggingface.co/ahm3texe/neurodino).
 Details and every game are in [`evaluation/`](evaluation/README.md). The paper
-([`paper/neurodino-en.pdf`](paper/neurodino-en.pdf); Turkish original:
-[`paper/neurodino.pdf`](paper/neurodino.pdf)) describes all three models and
+([`paper/neurodino-en.pdf`](https://ahm3texe-neurodino.static.hf.space/paper/neurodino-en.pdf); Turkish original:
+[`paper/neurodino.pdf`](https://ahm3texe-neurodino.static.hf.space/paper/neurodino.pdf)) describes all three models and
 how they were tested.
 
 ## Credits and license
