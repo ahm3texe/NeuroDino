@@ -95,6 +95,8 @@ npm run dev
 ```
 
 `npm run build` advances the checkpoint and writes the static site to `dist/`.
+It also copies the paper's two PDFs from `../paper` into `dist/paper/`, so
+the page can open them without leaving the site.
 
 The site is live at https://huggingface.co/spaces/ahm3texe/neurodino. The
 workflow uploads with Hugging Face Trusted Publishers: the Space's settings
